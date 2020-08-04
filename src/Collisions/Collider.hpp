@@ -16,7 +16,7 @@ public:
     vector<Triangle> Triangles;
 
     void LoadCollider(Mesh *mesh);
-    virtual bool CheckCollision(Ray ray, bool useDoublePercision = false);
+    virtual bool CheckCollision(Ray ray, bool useDoublePercision = false, Vector3* hit = nullptr);
 };
 
 #endif

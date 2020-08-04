@@ -33,7 +33,7 @@ public:
   static void AddCollider(Collider* collider);
   static void ProcessRay(Ray ray, Component* caller);
   static void ColliderVsRay(Ray ray);
-  static vector<Hit*> ColliderVsRay(Ray ray, bool stopFirst = false);
+  static vector<Hit*> ColliderVsRay(Ray ray, bool getIntersection = false);
 };
 
 #endif

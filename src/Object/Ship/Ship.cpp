@@ -5,6 +5,7 @@
 #include "../../Core/MeshManager.hpp"
 #include "../../Core/UpdateManager.hpp"
 #include "../RayDrawer.hpp"
+#include "../LineDrawer.hpp"
 
 void Ship::Load() {
     
@@ -36,7 +37,7 @@ void Ship::Update() {
     ///Camera Rotation
 
     if (Input::GetMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
-        CollisionManager::ProcessRay(Ray(Camera::Position, Screen2World(Input::MousePosition)), this);
+        CollisionManager::ProcessRay(Ray(Camera::Position, Screen2World(Input::MousePosition), true), this);
     }
 
     if (Input::GetMouseButton(GLFW_MOUSE_BUTTON_RIGHT)) {
@@ -51,7 +52,12 @@ void Ship::Update() {
 }
 
 void Ship::OnCollision(RayTestResult result) {
-    Debug::Alert("Mouse Hit - " + result.result[0]->Hitted->object->Tag);
+    
+    Object * line = new Object();
+    LineDrawer* lineDrawer = new LineDrawer(Camera::Position, *result.result[0]->Intersection);
+    line->AddComponent(lineDrawer);
+    ObjectsHandler::AddObject(line);
+    Debug::Alert("Mouse Hit - " + result.result[0]->Hitted->object->Tag + " - Location X " + to_string(result.result[0]->Intersection->X) + " Y " + to_string(result.result[0]->Intersection->Y) + " Z " + to_string(result.result[0]->Intersection->Z));
 }
 
 void Ship::Render() {

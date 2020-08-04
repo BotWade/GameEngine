@@ -2,14 +2,21 @@
 
 Ray::Ray() {
     Origin = Direction = Vector3();
-    StopFirst = false;
+    getIntersection = false;
 }
 
 Ray::Ray(Vector3 origin, Vector3 direction) {
 
     Origin = origin;
     Direction = direction;
-    StopFirst = false;
+    getIntersection = false;
+}
+
+Ray::Ray(Vector3 origin, Vector3 direction, bool GetIntersection) {
+
+    Origin = origin;
+    Direction = direction;
+    getIntersection = GetIntersection;
 }
 
 Vector3 Ray::GetPoint(float Distance) {
@@ -17,7 +24,7 @@ Vector3 Ray::GetPoint(float Distance) {
 }
 
 bool Ray::operator==(const Ray& other) const {
-    return Origin == other.Origin && Direction == other.Direction && StopFirst == other.StopFirst;
+    return Origin == other.Origin && Direction == other.Direction && getIntersection == other.getIntersection;
 }
 
 bool Ray::operator<(const Ray& other) const {

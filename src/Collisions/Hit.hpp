@@ -11,6 +11,7 @@ struct Hit {
     Vector3 Target;
     float Distance;
     Collider* Hitted;
+    Vector3* Intersection;
 };
 
 

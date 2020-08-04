@@ -2,7 +2,7 @@
 #include "../Core/ObjectsHandler.hpp"
 #include "../Object/RayDrawer.hpp"
 
-#define BACKFACE_CULLING
+//#define BACKFACE_CULLING
 
 void Collider::LoadCollider(Mesh *mesh) {
 
@@ -21,12 +21,13 @@ void Collider::LoadCollider(Mesh *mesh) {
     }
 }
 
+
 ///Check If Rays Collides
 ///Wateright intersection algorithm
 ///ATTENTION! Default Collision Check Checks Each Triangle Against Ray!
 ///If You Are Going To Use Default Collision Check DONT Use A Mesh As A Collider (1000 triangles == 1000 Checks)
 ///Only Use Double Percision If Really Needed
-bool Collider::CheckCollision(Ray ray, bool useDoublePercision) {
+bool Collider::CheckCollision(Ray ray, bool useDoublePercision, Vector3* hit) {
 
     if (Triangles.size() == 0)
         return false;
@@ -43,8 +44,9 @@ bool Collider::CheckCollision(Ray ray, bool useDoublePercision) {
         Ky = temp;
     }
 
-    float Sx = ray.Direction[Kx] / ray.Direction[Kz];
-    float Sy = ray.Direction[Ky] / ray.Direction[Kz];
+    float Sz = 1.0 / ray.Direction[Kz];
+    float Sx = ray.Direction[Kx] * Sz;
+    float Sy = ray.Direction[Ky] * Sz;
 
     Matrix4 WorldPos = object->transform.ModelMatrix();
 
@@ -94,7 +96,21 @@ bool Collider::CheckCollision(Ray ray, bool useDoublePercision) {
 
         if (det == 0.0f)
             continue;
-            
+
+        if (hit == nullptr)
+            return true;
+
+        float Az = Sz * A[Kz];
+        float Bz = Sz * B[Kz];
+        float Cz = Sz * C[Kz];
+        float T = U * Az + V * Bz + W * Cz;
+
+        float invDet = 1.0f / det;
+        float t = T * invDet;
+
+        hit->X = t * ray.Direction[0] + ray.Origin[0];
+        hit->Y = t * ray.Direction[1] + ray.Origin[1];
+        hit->Z = t * ray.Direction[2] + ray.Origin[2];
         return true;
     }
     

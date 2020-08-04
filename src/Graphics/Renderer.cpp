@@ -77,6 +77,13 @@ void Renderer::DrawRay(Ray ray, float Distance, Vector3 Color) {
     glEnd();
 }
 
+void Renderer::DrawLine(Vector3 Origin, Vector3 End, Vector3 Color) {
+    glBegin(GL_LINE_STRIP);
+        glColor3f(Color.X, Color.Y, Color.Z);
+        glVertex3f(Origin.X, Origin.Y, Origin.Z);
+        glVertex3f(End.X, End.Y, End.Z);
+    glEnd();}
+
 void Renderer::DrawTriangle(Triangle triangle, Vector3 Color) {
     glBegin(GL_TRIANGLES);
         glColor3f(Color.X, Color.Y, Color.Z);

@@ -21,7 +21,7 @@ void * CollisionManager::Worker(void *threadarg) {
 
             RayTestResult result = RayTestResult();
             result.ray = ray;
-            result.result = ColliderVsRay(ray, ray.StopFirst);
+            result.result = ColliderVsRay(ray, ray.getIntersection);
             vector<Component*> Components = Work.begin()->second;
             Work.erase(Work.begin());
             size_t Size = Components.size();
@@ -63,7 +63,7 @@ void CollisionManager::ProcessRay(Ray ray, Component* caller) {
     QueueInUse.clear();
 }
 
-vector<Hit*> CollisionManager::ColliderVsRay(Ray ray, bool stopFirst) {
+vector<Hit*> CollisionManager::ColliderVsRay(Ray ray, bool getIntersection) {
 
     size_t Size = Colliders.size();
 
@@ -71,20 +71,23 @@ vector<Hit*> CollisionManager::ColliderVsRay(Ray ray, bool stopFirst) {
 
     for (size_t Index = 0; Index < Size; Index++) {
 
-        if (Colliders[Index]->CheckCollision(ray)) {
+        Vector3* Intersection = (getIntersection ? new Vector3() : nullptr);
+
+        if (Colliders[Index]->CheckCollision(ray, false, Intersection)) {
             Hit *h = new Hit();
             h->Origin = ray.Origin;
             h->Target = Colliders[Index]->object->transform.Position();
-            h->Distance = Magnitude(Colliders[Index]->object->transform.Position() - ray.Origin);
+            h->Distance = Magnitude(*Intersection - ray.Origin);
             h->Hitted = Colliders[Index];
+            h->Intersection = Intersection;
 
             hit.push_back(h);
-            
-            if (stopFirst) {
-                return hit;
-            }
         }
     }
+
+    sort(hit.begin(), hit.end(), [] (const Hit* left, const Hit* right) {
+        return left->Distance < right->Distance;
+    });
 
     return hit;
 }

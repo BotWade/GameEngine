@@ -16,7 +16,7 @@ public:
     Mesh* mesh;
     Shader* shader;
 
-    Matrix4 Model;
+    Matrix4 model;
 
     Collider* collider;
     int colliderDataIndex;

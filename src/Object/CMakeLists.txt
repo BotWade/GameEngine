@@ -1,6 +1,7 @@
 target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Object.cpp)
 target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Skybox.cpp)
 target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/RayDrawer.cpp)
+target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/LineDrawer.cpp)
 target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Component.cpp)
 add_subdirectory(Asteroids/)
 add_subdirectory(Ship/)
