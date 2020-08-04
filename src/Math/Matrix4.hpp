@@ -20,7 +20,9 @@ struct Matrix4 {
     Matrix4(Vector4 c0, Vector4 c1, Vector4 c2, Vector4 c3);
 
     static Matrix4 Translate(Vector3 translation);
-    static Matrix4 Translate(Matrix4 Target,Vector3 translation);
+    static Matrix4 Translate(Matrix4 Target, Vector3 translation);
+    static Matrix4 Scale(Vector3 scale);
+    static Matrix4 Scale(Matrix4 Target, Vector3 scale);
     static Matrix4 LookAtLH(Vector3 Eye, Vector3 Center, Vector3 Up);
     static Matrix4 PerspectiveFovLH(float Fov, float Width, float Height, float zNear, float zFar);
     static Matrix4 Inverse(Matrix4 Value);
@@ -29,6 +31,7 @@ struct Matrix4 {
     Matrix4 operator*(const Matrix4& right) const;
     Matrix4 operator*(const float& right) const;
     Vector4 operator*(const Vector4& right) const;
+    Vector3 operator*(const Vector3& right) const;
 };
 
 

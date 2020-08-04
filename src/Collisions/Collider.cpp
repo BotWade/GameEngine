@@ -46,11 +46,13 @@ bool Collider::CheckCollision(Ray ray, bool useDoublePercision) {
     float Sx = ray.Direction[Kx] / ray.Direction[Kz];
     float Sy = ray.Direction[Ky] / ray.Direction[Kz];
 
+    Matrix4 WorldPos = object->transform.ModelMatrix();
+
     for (int Index = 0; Index < Size; Index++) {
 
-        Vector3 A = Triangles[Index].Pos1 + object->transform.Position - ray.Origin;
-        Vector3 B = Triangles[Index].Pos2 + object->transform.Position - ray.Origin;
-        Vector3 C = Triangles[Index].Pos3 + object->transform.Position - ray.Origin;
+        Vector3 A = WorldPos * Triangles[Index].Pos1 - ray.Origin;
+        Vector3 B = WorldPos * Triangles[Index].Pos2 - ray.Origin;
+        Vector3 C = WorldPos * Triangles[Index].Pos3 - ray.Origin;
 
         float Ax = A[Kx] - Sx * A[Kz];
         float Ay = A[Ky] - Sy * A[Kz];

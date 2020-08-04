@@ -79,3 +79,21 @@ Vector4 Vector4::operator*(const Vector4& right) const {
 
     return Vector4(X * right.X, Y * right.Y, Z * right.Z, W * right.W);
 }
+
+Vector4& Vector4::operator+=(const Vector4& right) {
+    
+    X += right.X;
+    Y += right.Y;
+    Z += right.Z;
+    W += right.W;
+    return *this;
+}
+
+Vector4& Vector4::operator*=(const float& right) {
+    
+    X *= right;
+    Y *= right;
+    Z *= right;
+    W *= right;
+    return *this;
+}

@@ -16,7 +16,7 @@ void Asteroid::Load() {
         
     //Debug::Alert("Finished Loading Mesh");
 
-    object->transform.Position = Vector3(rand() % (200 - (-200) + 1) + -200, rand() % (200 - (-200) + 1) + -200, rand() % (200 - (-200) + 1) + -200);
+    object->transform.localPosition = Vector3(rand() % (200 - (-200) + 1) + -200, rand() % (200 - (-200) + 1) + -200, rand() % (200 - (-200) + 1) + -200);
 
     collider = new Collider();
     object->AddComponent(collider);
@@ -26,7 +26,7 @@ void Asteroid::Load() {
 
 void Asteroid::Update() {
 
-    Model = Camera::ProjectionView * Matrix4::Translate(object->transform.Position);
+    Model = Camera::ProjectionView * object->transform.ModelMatrix();
 
 }
 
@@ -36,7 +36,7 @@ void Asteroid::Render() {
         ///Draw Collider Triangles
         size_t Size = collider->Triangles.size();
         for (size_t Index = 0; Index < Size; Index++)
-            Renderer::DrawTriangle(collider->Triangles[Index] + object->transform.Position);
+            Renderer::DrawTriangle(collider->Triangles[Index] * object->transform.ModelMatrix());
     }
     else {
         shader->Bind();

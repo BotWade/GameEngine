@@ -18,10 +18,15 @@ class Object {
 public:
     string Tag;
     Transform transform;
+    Object* Parent;
+
+    Object();
 
     vector<Component*> Components;
-    
+    vector<Object*> Children;
+
     void AddComponent(Component* component);
+    void AddChild(Object* child);
     void ExecuteCode(ExecutionCode code);
 };
 

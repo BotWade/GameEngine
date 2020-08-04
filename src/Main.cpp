@@ -27,6 +27,12 @@ int main(void) {
     Object* ship = new Object();
     ship->Tag = "Ship";
     ship->AddComponent(new Ship());
+    
+    Object* shipCollider = new Object();
+    shipCollider->Tag = "ShipCollider";
+    shipCollider->AddComponent(new ShipCollider());
+    ship->AddChild(shipCollider);
+
     UpdateManager::AddToGroup("Others", ship);
     ObjectsHandler::AddObject(ship);
 

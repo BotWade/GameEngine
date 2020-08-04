@@ -74,8 +74,8 @@ vector<Hit*> CollisionManager::ColliderVsRay(Ray ray, bool stopFirst) {
         if (Colliders[Index]->CheckCollision(ray)) {
             Hit *h = new Hit();
             h->Origin = ray.Origin;
-            h->Target = Colliders[Index]->object->transform.Position;
-            h->Distance = Magnitude(Colliders[Index]->object->transform.Position - ray.Origin);
+            h->Target = Colliders[Index]->object->transform.Position();
+            h->Distance = Magnitude(Colliders[Index]->object->transform.Position() - ray.Origin);
             h->Hitted = Colliders[Index];
 
             hit.push_back(h);

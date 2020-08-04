@@ -1,9 +1,19 @@
 #include "Object.hpp"
 #include "Component.hpp"
 
+Object::Object() {
+    transform.object = this;
+    Parent = nullptr;
+}
+
 void Object::AddComponent(Component* component) {
     component->object = this;
     Components.push_back(component);
+}
+
+void Object::AddChild(Object* child) {
+    child->Parent = this;
+    Children.push_back(child);
 }
 
 void Object::ExecuteCode(ExecutionCode code) {
@@ -26,4 +36,8 @@ void Object::ExecuteCode(ExecutionCode code) {
         }
     }
     
+    Size = Children.size();
+
+    for (size_t Index = 0; Index < Size; Index++)
+        Children[Index]->ExecuteCode(code);
 }

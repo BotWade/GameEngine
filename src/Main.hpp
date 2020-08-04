@@ -8,8 +8,9 @@
 #include "Core/ShaderManager.hpp"
 #include "Core/MeshManager.hpp"
 #include "Core/UpdateManager.hpp"
-#include "Object/Ship.hpp"
 #include "Object/Skybox.hpp"
 #include "Object/Asteroids/Asteroid.hpp"
+#include "Object/Ship/ShipCollider.hpp"
+#include "Object/Ship/Ship.hpp"
 
 #endif

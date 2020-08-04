@@ -1,7 +1,7 @@
 #ifndef _QUATERNION_
 #define _QUATERNION_
 
-#include "Vector4.hpp"
+#include "Matrix4.hpp"
 
 struct Quaternion {
 public:
@@ -14,6 +14,7 @@ public:
 
     static Quaternion EulerToQuaternion(Vector3 Euler);
     static Quaternion lerp(Quaternion Left, Quaternion Right, float Time);
+    static Matrix4 toMatrix4(Quaternion quat);
 
     Quaternion operator*(float right);
     Quaternion operator*(Quaternion right);

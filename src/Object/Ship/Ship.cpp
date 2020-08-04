@@ -1,10 +1,10 @@
 #include "Ship.hpp"
-#include "../Math/Matrix3.hpp"
-#include "../Core/ObjectsHandler.hpp"
-#include "../Core/ShaderManager.hpp"
-#include "../Core/MeshManager.hpp"
-#include "../Core/UpdateManager.hpp"
-#include "RayDrawer.hpp"
+#include "../../Math/Matrix3.hpp"
+#include "../../Core/ObjectsHandler.hpp"
+#include "../../Core/ShaderManager.hpp"
+#include "../../Core/MeshManager.hpp"
+#include "../../Core/UpdateManager.hpp"
+#include "../RayDrawer.hpp"
 
 void Ship::Load() {
     
@@ -14,12 +14,14 @@ void Ship::Load() {
     mesh = MeshManager::GetMesh("Data/Meshes/Main Ship.obj");
     if (!mesh->AttributesProcessed)
         mesh->ProcessAttributes(GL_FLOAT, sizeof(float), shader);
+    movementMesh = MeshManager::GetMesh("/Data/Meshes/Sphere.obj");
+    
     Debug::Alert("Finished Loading Mesh");
 
-    object->transform.Position = Vector3(0, 0, 0);
+    object->transform.localPosition = Vector3(0, 0, 0);
 
     Camera::FirstPersonMode = false;
-    Camera::Center = object->transform.Position;
+    Camera::Center = object->transform.localPosition;
     Camera::Position = Vector3(0, 0, 10);
 
     collider = new Collider();
@@ -44,7 +46,7 @@ void Ship::Update() {
         ObjectsHandler::AddObject(ray);
     }
 
-    Model = Camera::ProjectionView * Matrix4::Translate(object->transform.Position);
+    model = Camera::ProjectionView * object->transform.ModelMatrix();
 
 }
 
@@ -56,14 +58,15 @@ void Ship::Render() {
 
     if (Input::GetMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
         ///Draw Collider Triangles
+        Matrix4 Model = object->transform.ModelMatrix();
         size_t Size = collider->Triangles.size();
         for (size_t Index = 0; Index < Size; Index++)
-            Renderer::DrawTriangle(collider->Triangles[Index] + object->transform.Position);
+            Renderer::DrawTriangle(collider->Triangles[Index] * Model);
     }
     else {
         shader->Bind();
 
-        glUniformMatrix4fv(shader->GetUniformId("MVP"), 1, GL_FALSE, &Model.col0.X);
+        glUniformMatrix4fv(shader->GetUniformId("MVP"), 1, GL_FALSE, &model.col0.X);
         
         mesh->Bind();
         mesh->Draw();

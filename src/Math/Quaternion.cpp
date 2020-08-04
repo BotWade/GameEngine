@@ -1,5 +1,6 @@
 #include "Quaternion.hpp"
 #include "Math.hpp"
+#include "Matrix3.hpp"
 
 Quaternion::Quaternion() {
     Quat = Vector4(0, 0, 0, 1);
@@ -51,6 +52,10 @@ Quaternion Quaternion::EulerToQuaternion(Vector3 Euler) {
 Quaternion Quaternion::lerp(Quaternion Left, Quaternion Right, float Time) {
 
     return Left * (1.0f - Time) + (Right * Time);
+}
+
+Matrix4 Quaternion::toMatrix4(Quaternion quat) {
+    return Matrix4(Matrix3(quat));
 }
 
 Quaternion Quaternion::operator*(float right) {

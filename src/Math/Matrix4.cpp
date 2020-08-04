@@ -94,11 +94,27 @@ Matrix4 Matrix4::Translate(Vector3 translation) {
     return Translate(Matrix4(1), translation);
 }
 
-Matrix4 Matrix4::Translate(Matrix4 Target,Vector3 translation) {
+Matrix4 Matrix4::Translate(Matrix4 Target, Vector3 translation) {
 
     Matrix4 Result(Target);
 
     Result.col3 = Target.col0 * translation.X + Target.col1 * translation.Y + Target.col2 * translation.Z + Target.col3;
+    return Result;
+}
+
+Matrix4 Matrix4::Scale(Vector3 translation) {
+
+    return Scale(Matrix4(1), translation);
+}
+
+Matrix4 Matrix4::Scale(Matrix4 Target, Vector3 scale) {
+    
+    Matrix4 Result(Target);
+    
+    Result.col0 *= scale.X;
+    Result.col1 *= scale.Y;
+    Result.col2 *= scale.Z;
+    
     return Result;
 }
 
@@ -210,4 +226,8 @@ Vector4 Matrix4::operator*(const Vector4& right) const {
     Vector4 Add1 = Mul2 + Mul3;
     return Add0 + Add1;
 
+}
+
+Vector3 Matrix4::operator*(const Vector3& right) const {
+    return (*this * Vector4(right)).Xyz();
 }
