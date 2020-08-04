@@ -1,0 +1,8 @@
+target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Color.cpp)
+target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Frame.cpp)
+target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Renderer.cpp)
+target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Shader.cpp)
+target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Uniform.cpp)
+target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Material.cpp)
+target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Texture.cpp)
+target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Font.cpp)
