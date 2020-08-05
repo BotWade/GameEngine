@@ -1,4 +1,5 @@
 #include "Vector3.hpp"
+#include <math.h>
 
 Vector3::Vector3() {
 
@@ -18,6 +19,23 @@ Vector3 Vector3::Zero() {
 
 Vector2 Vector3::Xy() {
     return Vector2(X, Y);
+}
+
+Vector3 Vector3::MoveTowards(Vector3 Current, Vector3 Target, float MaxDistanceDelta) {
+
+            float toVector_x = Target.X - Current.X;
+            float toVector_y = Target.Y - Current.Y;
+            float toVector_z = Target.Z - Current.Z;
+
+            float sqdist = toVector_x * toVector_x + toVector_y * toVector_y + toVector_z * toVector_z;
+
+            if (sqdist == 0 || (MaxDistanceDelta >= 0 && sqdist <= MaxDistanceDelta * MaxDistanceDelta))
+                return Target;
+            float dist = sqrt(sqdist);
+
+            return Vector3(Current.X + toVector_x / dist * MaxDistanceDelta,
+                Current.Y + toVector_y / dist * MaxDistanceDelta,
+                Current.Z + toVector_z / dist * MaxDistanceDelta);
 }
 
 bool Vector3::operator==(const Vector3& other) const {

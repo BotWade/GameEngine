@@ -24,6 +24,7 @@ void Ship::Load() {
     Camera::FirstPersonMode = false;
     Camera::Center = object->transform.localPosition;
     Camera::Position = Vector3(0, 0, 10);
+    Camera::Zoom = 10;
 
     collider = new Collider();
     object->AddComponent(collider);
@@ -35,28 +36,22 @@ void Ship::Load() {
 void Ship::Update() {
 
     ///Camera Rotation
-
-    if (Input::GetMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
+    if (Input::GetMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT) || Input::GetMouseButton(GLFW_MOUSE_BUTTON_RIGHT))
         CollisionManager::ProcessRay(Ray(Camera::Position, Screen2World(Input::MousePosition), true), this);
-    }
 
-    if (Input::GetMouseButton(GLFW_MOUSE_BUTTON_RIGHT)) {
-        Object * ray = new Object();
-        RayDrawer* rayDrawer = new RayDrawer(Ray(Camera::Position, Screen2World(Input::MousePosition)));
-        ray->AddComponent(rayDrawer);
-        ObjectsHandler::AddObject(ray);
+    if (object->transform.Position() != MovementTarget) {
+        object->transform.localPosition = Vector3::MoveTowards(object->transform.localPosition, MovementTarget, TimeHelper::GetDeltaTime() * 5.0f); 
+        Camera::OriginalPos = object->transform.Position() + Vector3(0, 0, Camera::Zoom);
+        Camera::Center = object->transform.Position();
     }
-
     model = Camera::ProjectionView * object->transform.ModelMatrix();
-
 }
 
 void Ship::OnCollision(RayTestResult result) {
     
-    Object * line = new Object();
-    LineDrawer* lineDrawer = new LineDrawer(Camera::Position, *result.result[0]->Intersection);
-    line->AddComponent(lineDrawer);
-    ObjectsHandler::AddObject(line);
+    if (Input::GetMouseButton(GLFW_MOUSE_BUTTON_RIGHT))
+        MovementTarget = *result.result[0]->Intersection;
+
     Debug::Alert("Mouse Hit - " + result.result[0]->Hitted->object->Tag + " - Location X " + to_string(result.result[0]->Intersection->X) + " Y " + to_string(result.result[0]->Intersection->Y) + " Z " + to_string(result.result[0]->Intersection->Z));
 }
 

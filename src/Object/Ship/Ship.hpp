@@ -20,6 +20,8 @@ public:
     
     Collider* collider;
     
+    Vector3 MovementTarget;
+
     void Load() override;
     void Update() override;
     void OnCollision(RayTestResult result) override;

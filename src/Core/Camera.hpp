@@ -8,11 +8,12 @@
 
 class Camera {
 public:
+    static float Zoom;
     static Vector3 Position;
     static Vector3 Center;
     static Vector3 Up;
     static Quaternion Rotation;
-
+    static Vector3 OriginalPos;
     static Matrix4 Projection;
     static Matrix4 View;
     static Matrix4 ProjectionView;

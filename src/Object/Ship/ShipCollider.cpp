@@ -10,7 +10,7 @@ void ShipCollider::Load() {
     if (object->Parent == nullptr)
         Debug::Alert("ShipCollider Doesn't Have A Parent");
 
-    object->transform.localScale = Vector3(100, 100, 100);
+    object->transform.localScale = Vector3(1000, 1000, 1000);
 
     collider = new Collider();
     object->AddComponent(collider);

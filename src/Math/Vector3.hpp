@@ -16,6 +16,8 @@ struct Vector3 {
 
     Vector2 Xy();
 
+    static Vector3 MoveTowards(Vector3 Current, Vector3 Target, float MaxDistanceDelta);
+
     bool operator==(const Vector3& other) const;
     bool operator!=(const Vector3& other) const;
 
