@@ -23,19 +23,15 @@ Vector2 Vector3::Xy() {
 
 Vector3 Vector3::MoveTowards(Vector3 Current, Vector3 Target, float MaxDistanceDelta) {
 
-            float toVector_x = Target.X - Current.X;
-            float toVector_y = Target.Y - Current.Y;
-            float toVector_z = Target.Z - Current.Z;
+    Vector3 Direction = Target - Current;
+    float sqdist = Direction.X * Direction.X + Direction.Y * Direction.Y + Direction.Z * Direction.Z;
 
-            float sqdist = toVector_x * toVector_x + toVector_y * toVector_y + toVector_z * toVector_z;
+    if (sqdist == 0 || (MaxDistanceDelta >= 0 && sqdist <= MaxDistanceDelta * MaxDistanceDelta))
+        return Target;
 
-            if (sqdist == 0 || (MaxDistanceDelta >= 0 && sqdist <= MaxDistanceDelta * MaxDistanceDelta))
-                return Target;
-            float dist = sqrt(sqdist);
+    float Dist = sqrt(sqdist);
 
-            return Vector3(Current.X + toVector_x / dist * MaxDistanceDelta,
-                Current.Y + toVector_y / dist * MaxDistanceDelta,
-                Current.Z + toVector_z / dist * MaxDistanceDelta);
+    return Current + Direction / Dist * MaxDistanceDelta;
 }
 
 bool Vector3::operator==(const Vector3& other) const {
