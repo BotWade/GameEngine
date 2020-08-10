@@ -181,6 +181,50 @@ Matrix4 Matrix4::Ortho(float Left, float Right, float Bottom, float Top) {
     return Result;
 }
 
+Matrix4 Matrix4::CreateFromAxisAngle(Vector3 Axis, float Angle) {
+    Vector3 NormAxis = Normalize(Axis);
+    float axisX = NormAxis.X;
+    float axisY = NormAxis.Y;
+    float axisZ = NormAxis.Z;
+
+    float Cos = cos(-Angle);
+    float Sin = sin(-Angle);
+    float t = 1.0f - Cos;
+
+    float tXX = t * axisX * axisX;
+    float tXY = t * axisX * axisY;
+    float tXZ = t * axisX * axisZ;
+    float tYY = t * axisY * axisY;
+    float tYZ = t * axisY * axisZ;
+    float tZZ = t * axisZ * axisZ;
+    
+    float sinX = Sin * axisX;
+    float sinY = Sin * axisY;
+    float sinZ = Sin * axisZ;
+
+    Matrix4 Result = Matrix4();
+    Result.col0.X = tXX + Cos;
+    Result.col0.Y = tXY - sinZ;
+    Result.col0.Z = tXZ + sinY;
+    Result.col0.W = 0;
+    Result.col1.X = tXY + sinZ;
+    Result.col1.Y = tYY + Cos;
+    Result.col1.Z = tYZ - sinX;
+    Result.col1.W = 0;
+    Result.col2.X = tXZ - sinY;
+    Result.col2.Y = tYZ + sinX;
+    Result.col2.Z = tZZ + Cos;
+    Result.col2.W = 0;
+    Result.col3 = Vector4(0, 0, 0, 1);
+
+    return Result;
+}
+
+Matrix4 Matrix4::FromQuaternion(Quaternion quat) {
+    Vector4 AxisAngle = Quaternion::ToAxisAngle(quat);
+    return CreateFromAxisAngle(AxisAngle.Xyz(), AxisAngle.W);
+}
+
 Matrix4 Matrix4::operator*(const Matrix4& right) const {
 
     Vector4 SrcA0 = col0;

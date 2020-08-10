@@ -21,6 +21,7 @@ int Window::Setup() {
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetScrollCallback(window, mouseScrollCallback);
     glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glEnable(GL_DEPTH_TEST);
@@ -73,4 +74,8 @@ void Window::mouseScrollCallback(GLFWwindow* window, double xoffset, double yoff
 void Window::errorCallback(int error_code, const char* description) {
 
     Debug::Alert("OpenGL Error - Code" + to_string(error_code) + ": \n" + description);
+}
+
+void Window::framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
 }

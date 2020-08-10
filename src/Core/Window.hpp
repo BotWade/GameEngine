@@ -18,6 +18,7 @@ public:
     static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
     static void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
     static void errorCallback(int error_code, const char* description);
+    static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 };
 
 #endif

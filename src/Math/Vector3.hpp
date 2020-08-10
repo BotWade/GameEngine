@@ -2,6 +2,7 @@
 #define _VECTOR3_
 
 #include "Vector2.hpp"
+#include "Math.hpp"
 
 struct Vector3 {
     
@@ -15,9 +16,12 @@ struct Vector3 {
     static Vector3 Zero();
 
     Vector2 Xy();
+    Vector3 GetSafeNormal(float Tolerance = SMALL_NUMBER);
+    float Length();
+    float LengthSquared();
 
     static Vector3 MoveTowards(Vector3 Current, Vector3 Target, float MaxDistanceDelta);
-
+    
     bool operator==(const Vector3& other) const;
     bool operator!=(const Vector3& other) const;
 

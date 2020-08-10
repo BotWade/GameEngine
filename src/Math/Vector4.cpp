@@ -50,6 +50,12 @@ Vector4::Vector4(float x, float y, float z, float w) {
     W = w;
 }
 
+void Vector4::Xyz(Vector3 Xyz) {
+    X = Xyz.X;
+    Y = Xyz.Y;
+    Z = Xyz.Z;
+}
+
 Vector3 Vector4::Xyz() {
 
     return Vector3(X, Y, Z);

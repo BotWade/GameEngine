@@ -20,5 +20,5 @@ Vector3 Transform::Position() {
 }
 
 Matrix4 Transform::ModelMatrix() {
-    return Matrix4::Translate(Position()) * Quaternion::toMatrix4(Rotation()) * Matrix4::Scale(Scale());
+    return Matrix4::Translate(Position()) * Matrix4::FromQuaternion(Rotation()) * Matrix4::Scale(Scale());
 }

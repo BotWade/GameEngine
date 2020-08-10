@@ -12,7 +12,6 @@ public:
     Vector3 col2;
 
     Matrix3(Matrix4 v);
-    Matrix3(Quaternion Quat);
 };
 
 

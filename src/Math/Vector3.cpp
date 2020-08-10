@@ -21,6 +21,26 @@ Vector2 Vector3::Xy() {
     return Vector2(X, Y);
 }
 
+float Vector3::Length() {
+    return sqrt(X * X + Y * Y + Z * Z);
+}
+
+float Vector3::LengthSquared() {
+    return X * X + Y * Y + Z * Z;
+}
+
+Vector3 Vector3::GetSafeNormal(float Tolerance) {
+    float SquareSum = X*X + Y*Y + Z*Z;
+
+    if (SquareSum == 1.0f)
+        return *this;
+    else if (SquareSum < Tolerance)
+        return Vector3::Zero();
+    
+    float Scale = InvSqrt(SquareSum);
+    return Vector3(X * Scale, Y * Scale, Z * Scale);
+}
+
 Vector3 Vector3::MoveTowards(Vector3 Current, Vector3 Target, float MaxDistanceDelta) {
 
     Vector3 Direction = Target - Current;

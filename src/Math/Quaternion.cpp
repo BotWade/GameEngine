@@ -1,6 +1,7 @@
 #include "Quaternion.hpp"
 #include "Math.hpp"
 #include "Matrix3.hpp"
+#include <math.h>
 
 Quaternion::Quaternion() {
     Quat = Vector4(0, 0, 0, 1);
@@ -8,6 +9,15 @@ Quaternion::Quaternion() {
 
 Quaternion::Quaternion(Vector4 quat) {
     Quat = quat;
+}
+
+Quaternion::Quaternion(Vector3 Xyz, float W) {
+    Quat = Vector4(Xyz, W);
+}
+
+
+float Quaternion::Length() {
+    return sqrt(Quat.W * Quat.W  + Quat.Xyz().LengthSquared());
 }
 
 Vector3 Quaternion::ToEuler() {
@@ -49,13 +59,86 @@ Quaternion Quaternion::EulerToQuaternion(Vector3 Euler) {
     return Quaternion(q);
 }
 
+Quaternion CreateFromAxisAngle(Vector3 axis, float angle) {
+    float halfAngle = angle * .5f;
+    float s = sin(halfAngle);
+    Quaternion q;
+    q.Quat.X = axis.X * s;
+    q.Quat.Y = axis.Y * s;
+    q.Quat.Z = axis.Z * s;
+    q.Quat.W = cos(halfAngle);
+    return q;
+}
+
+Quaternion Quaternion::LookRotation(Vector3 Source, Vector3 Destination) {
+
+    Vector3 forwardVector = Normalize(Destination - Source);
+
+    float dot = Dot(Vector3(0, 0, 1), forwardVector);
+
+    if (abs(dot - (-1.0f)) < 0.000001f)
+        return Quaternion(Vector4(0.0f , 1.0f, 0.0f, M_PI));
+    if (abs(dot - (1.0f)) < 0.000001f)
+        return Quaternion();
+
+    float rotAngle = acos(dot);
+    Vector3 rotAxis = Cross(Vector3(0, 0, 1), forwardVector);
+    rotAxis = Normalize(rotAxis);
+    return CreateFromAxisAngle(rotAxis, rotAngle);
+}
+
+Quaternion Quaternion::SlerpNotNormalized(Quaternion Left, Quaternion Right, float Slerp) {
+
+    float RawCosom = Left.Quat.X * Right.Quat.X + Left.Quat.Y * Right.Quat.Y + Left.Quat.Z * Right.Quat.Z + Left.Quat.W * Right.Quat.W;
+    float Cosom = RawCosom >= 0.f ? RawCosom : -RawCosom;
+
+    float Scale0, Scale1;
+
+    if (Cosom < 0.9999f) {
+
+        float Omega = acos(Cosom);
+        float InvSin = 1.f/sin(Omega);
+        Scale0 = sin((1.f - Slerp) * Omega) * InvSin;
+        Scale1 = sin(Slerp * Omega) * InvSin;
+    }
+    else {
+        Scale0 = 1.0f - Slerp;
+        Scale1 = Slerp;
+    }
+
+    Scale1 = RawCosom >= 0.f ? Scale1 : -Scale1;
+
+    return Quaternion(Vector4(Scale0 * Left.Quat.X + Scale1 * Right.Quat.X,
+                              Scale0 * Left.Quat.Y + Scale1 * Right.Quat.Y,
+                              Scale0 * Left.Quat.Z + Scale1 * Right.Quat.Z,
+                              Scale0 * Left.Quat.W + Scale1 * Right.Quat.W));
+}
+
+Quaternion Quaternion::Slerp(Quaternion Left, Quaternion Right, float Slerp) {
+    return Normalize(SlerpNotNormalized(Left, Right, Slerp));
+}
+
 Quaternion Quaternion::lerp(Quaternion Left, Quaternion Right, float Time) {
 
     return Left * (1.0f - Time) + (Right * Time);
 }
 
-Matrix4 Quaternion::toMatrix4(Quaternion quat) {
-    return Matrix4(Matrix3(quat));
+Vector4 Quaternion::ToAxisAngle(Quaternion quat) {
+    
+    Quaternion q = quat;
+    if (abs(quat.Quat.W) > 1.0f)
+        q = Normalize(q);
+
+    Vector4 Result = Vector4(0.0f, 0.0f, 0.0f, 2.0f * acos(q.Quat.W));
+    
+    float den = sqrt(1.0f - (q.Quat.W * q.Quat.W));
+
+    if (den > 0.0001f)
+        Result.Xyz(q.Quat.Xyz() / den);
+    else
+        Result.Xyz(Vector3(1.0f, 0.0f, 0.0f));
+
+    return Result;
 }
 
 Quaternion Quaternion::operator*(float right) {

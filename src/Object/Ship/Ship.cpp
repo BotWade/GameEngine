@@ -43,7 +43,14 @@ void Ship::Update() {
         object->transform.localPosition = Vector3::MoveTowards(object->transform.localPosition, MovementTarget, TimeHelper::GetDeltaTime() * 5.0f); 
         Camera::OriginalPos = object->transform.Position() + Vector3(0, 0, Camera::Zoom);
         Camera::Center = object->transform.Position();
-    }
+
+        Quaternion lookRotation = Quaternion::LookRotation(object->transform.Position(), MovementTarget);
+
+        //If Source And Target Are Equal lookRotation Becames Broken (nan, nan, nan, nan) this way we can test if it is or isent
+        if (lookRotation.Quat.X == lookRotation.Quat.X)
+            object->transform.localRotation = Quaternion::Slerp(object->transform.localRotation, lookRotation, TimeHelper::GetDeltaTime());
+    } 
+
     model = Camera::ProjectionView * object->transform.ModelMatrix();
 }
 

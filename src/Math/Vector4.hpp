@@ -18,6 +18,7 @@ struct Vector4 {
     Vector4(float x, float y, float z);
     Vector4(float x, float y, float z, float w);
 
+    void Xyz(Vector3 Xyz);
     Vector3 Xyz();
     Vector2 Xy();
 

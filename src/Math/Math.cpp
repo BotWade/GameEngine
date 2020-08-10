@@ -1,5 +1,6 @@
 #include "Math.hpp"
 #include "../Core/Window.hpp"
+#include "Vector3.hpp"
 #include "Vector4.hpp"
 #include "Matrix4.hpp"
 #include "../Core/Camera.hpp"
@@ -36,10 +37,26 @@ Vector3 Projection(const Vector3 Left, const Vector3 Right) {
     return (Rightn) * Dot(Left, Rightn);
 }
 
-Vector3 Normalize(const Vector3 Input) {
+Vector3 Normalize(Vector3 Input) {
 
-    return Input * ReverseSqrt(Dot(Input, Input));
+    return Input * (1.0f / Input.Length());
 }
+
+Vector4 Normalize(const Vector4 Input, float Tolerance) {
+
+    float SquareSum = Input.X * Input.X + Input.Y * Input.Y + Input.Z + Input.Z + Input.W * Input.W;
+
+    if (SquareSum >= Tolerance)
+        return Input * InvSqrt(SquareSum);
+    else
+        return Vector4();
+}
+
+Quaternion Normalize(Quaternion Input) {
+    float Scale = 1.0f / Input.Length();
+    return Quaternion(Input.Quat.Xyz() * Scale, Input.Quat.W * Scale);
+}
+
 
 Vector3 RotateX(Vector3 Origin, Vector3 Point, float Deg) {
 
@@ -125,6 +142,10 @@ float Mix(Vector3 Input) {
 
 float Lerp(Vector3 Input) {
     return Mix(Input);
+}
+
+float InvSqrt(float Input) {
+    return 1.0f / sqrt(Input);
 }
 
 Vector3 operator*(const float& left, const Vector3& right) {

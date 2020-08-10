@@ -41,15 +41,14 @@ void Camera::Update() {
         y = Input::MouseOffset.Y * Speed * TimeHelper::GetDeltaTime();
         
         Euler.X += x;
-
+        
         if (Euler.Y + y > -M_PI_2 && Euler.Y + y < M_PI_2)
             Euler.Y += y;
 
         quat = Quaternion::EulerToQuaternion(Vector3(Euler.Y, Euler.X, 0));
-
     }
     
-    Position = (Matrix4::Translate(Center) * Quaternion::toMatrix4(quat)) * (OriginalPos - Center);
+    Position = (Matrix4::Translate(Center) * Matrix4::FromQuaternion(quat)) * (OriginalPos - Center);
 
     View = Matrix4::LookAtLH(Position, FirstPersonMode ? Position + Vector3(0, 0, 1) : Center, Vector3(0, 1, 0));
     
