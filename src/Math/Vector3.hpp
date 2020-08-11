@@ -21,6 +21,7 @@ struct Vector3 {
     float LengthSquared();
 
     static Vector3 MoveTowards(Vector3 Current, Vector3 Target, float MaxDistanceDelta);
+    static Vector3 RotateAround(Vector3 Position, Vector3 Target, Vector3 Up, float Angle);
     
     bool operator==(const Vector3& other) const;
     bool operator!=(const Vector3& other) const;

@@ -32,8 +32,8 @@ Vector3 RotateY(Vector3 Origin, Vector3 Point, float Deg);
 Vector3 RotateZ(Vector3 Origin, Vector3 Point, float Deg);
 Vector3 Screen2World(Vector2 Screen);
 Vector3 Abs(Vector3 Input);
-float MaxDim(Vector3 Input);
 
+float MaxDim(Vector3 Input);
 float Dot(const Vector3 Left, const Vector3 Right);
 float AngleBetween(const Vector3 Left, const Vector3 Right);
 float Magnitude(const Vector3 Input);
@@ -42,6 +42,7 @@ float ReverseSqrt(float Input);
 float Lerp(Vector3 Input);
 float Mix(Vector3 Input);
 float InvSqrt(float Input);
+float Distance(Vector3 Origin, Vector3 Target);
 
 Vector3 operator*(const float& left, const Vector3& right);
 

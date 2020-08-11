@@ -1,4 +1,6 @@
 #include "Vector3.hpp"
+#include "Quaternion.hpp"
+
 #include <math.h>
 
 Vector3::Vector3() {
@@ -52,6 +54,14 @@ Vector3 Vector3::MoveTowards(Vector3 Current, Vector3 Target, float MaxDistanceD
     float Dist = sqrt(sqdist);
 
     return Current + Direction / Dist * MaxDistanceDelta;
+}
+
+Vector3 Vector3::RotateAround(Vector3 Position, Vector3 Target, Vector3 Up, float Angle) {
+
+    Quaternion Quat = Quaternion::FromAxisAngle(Up, Angle);
+    Vector3 Dif = Position - Target;
+    Dif = Quat * Dif;
+    return Target + Dif;
 }
 
 bool Vector3::operator==(const Vector3& other) const {

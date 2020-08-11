@@ -1,29 +1,11 @@
 #ifndef _ASTEROIDS_
 #define _ASTEROIDS_
 
+#include "../SpaceObject.hpp"
 
-#include "../Component.hpp"
-#include "../../Graphics/Shader.hpp"
-#include "../../Core/Debug.hpp"
-#include "../../Core/Camera.hpp"
-#include "../../Mesh/Mesh.hpp"
-#include "../../Graphics/Texture.hpp"
-#include "../../Collisions/Collider.hpp"
-
-class Asteroid : public Component {
-public:
-
-    Mesh* mesh;
-    Shader* shader;
-
-    Matrix4 model;
-
-    Collider* collider;
-    int colliderDataIndex;
-    
+class Asteroid : public SpaceObject {
+public:    
     void Load() override;
-    void Update() override;
-    void Render() override;
 };
 
 #endif

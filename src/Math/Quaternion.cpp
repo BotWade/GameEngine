@@ -123,6 +123,14 @@ Quaternion Quaternion::lerp(Quaternion Left, Quaternion Right, float Time) {
     return Left * (1.0f - Time) + (Right * Time);
 }
 
+Quaternion Quaternion::FromAxisAngle(Vector3 Axis, float Angle) {
+    if (Axis.LengthSquared() == 0.0f)
+        return Quaternion();
+
+    Angle *= 0.5f;
+    return Normalize(Quaternion(Normalize(Axis) * sin(Angle), cos(Angle)));
+}
+
 Vector4 Quaternion::ToAxisAngle(Quaternion quat) {
     
     Quaternion q = quat;

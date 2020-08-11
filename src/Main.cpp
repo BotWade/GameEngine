@@ -26,7 +26,7 @@ int main(void) {
     ///Ship
     Object* ship = new Object();
     ship->Tag = "Ship";
-    ship->AddComponent(new Ship());
+    ship->AddComponent(new PlayerShip());
     
     Object* shipCollider = new Object();
     shipCollider->Tag = "ShipCollider";
