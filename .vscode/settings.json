@@ -1,6 +1,7 @@
 {
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "files.associations": {
-        "stb_image": "cpp"
+        "stb_image": "cpp",
+        "ranges": "cpp"
     }
 }
