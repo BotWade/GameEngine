@@ -28,6 +28,7 @@ add_custom_command(TARGET GameEngine PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_
 add_subdirectory(src/Collisions)
 add_subdirectory(src/Core)
 add_subdirectory(src/Graphics)
+add_subdirectory(src/InterfaceObject)
 add_subdirectory(src/Math)
 add_subdirectory(src/Object)
 add_subdirectory(src/Mesh)

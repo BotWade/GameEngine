@@ -9,6 +9,9 @@ int main(void) {
     MeshManager::Init();
     Renderer::Init();
     CollisionManager::Init();
+    InterfaceManager::Init();
+
+    InterfaceManager::AddObject(new InterfaceObject());
 
     ObjectsHandler::Load();
 
@@ -22,16 +25,11 @@ int main(void) {
     skyComp->LoadSkybox("Data/Skybox/SkyWater.skybox", "Data/Meshes/Teste.obj", "Data/Shaders/Skybox.shader");
     UpdateManager::AddToGroup("Others", skybox);
     ObjectsHandler::AddObject(skybox);
-
+    
     ///Ship
     Object* ship = new Object();
     ship->Tag = "Ship";
     ship->AddComponent(new PlayerShip());
-    
-    Object* shipCollider = new Object();
-    shipCollider->Tag = "ShipCollider";
-    shipCollider->AddComponent(new ShipCollider());
-    ship->AddChild(shipCollider);
 
     UpdateManager::AddToGroup("Others", ship);
     ObjectsHandler::AddObject(ship);
@@ -52,6 +50,7 @@ int main(void) {
         ObjectsHandler::AddObject(a);
     }
 
+    InterfaceManager::ExecuteCode(LOAD);
     ObjectsHandler::ExecuteCode(LOAD);
 
     glfwSwapInterval(0);
@@ -63,9 +62,11 @@ int main(void) {
         TimeHelper::Update();
         Renderer::Clear();
         Camera::Update();
+        InterfaceManager::ExecuteCode(UPDATE);
         ObjectsHandler::ExecuteCode(UPDATE);
         while (!CollisionManager::Work.empty()) { }
         ObjectsHandler::ExecuteCode(RENDER);
+        InterfaceManager::ExecuteCode(RENDER);
         ObjectsHandler::ExecuteCode(POSRENDER);
         Input::Clear();
         Renderer::Swap();

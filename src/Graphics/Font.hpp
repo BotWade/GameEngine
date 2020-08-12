@@ -30,7 +30,6 @@ struct Font {
 struct FontMeshData {
     unsigned int VAO;
     unsigned int VBO;
-    Matrix4 Projection;
 };
 
 #endif

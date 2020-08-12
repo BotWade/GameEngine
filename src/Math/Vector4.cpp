@@ -13,6 +13,13 @@ Vector4::Vector4(Vector2 Xy, float z, float w) {
     W = w;
 }
 
+Vector4::Vector4(Vector2 Xy, Vector2 Zw) {
+    X = Xy.X;
+    Y = Xy.Y;
+    Z = Zw.X;
+    W = Zw.Y;
+}
+
 Vector4::Vector4(Vector3 Xyz) {
 
     X = Xyz.X;

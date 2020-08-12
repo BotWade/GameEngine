@@ -22,8 +22,13 @@ public:
     
     vector<Vertex> Data;
     vector<unsigned int> Indices;
+    size_t IndexSize;
+
     bool LoadMesh(const char* FilePath);
+    bool LoadEmptyMesh(size_t DataSize, size_t IndexSize);
     void ProcessAttributes(int Type, unsigned long TypeSize, Shader* shader);
+    void UpdateData(void* data, size_t Size);
+    void UpdateIndex(void* data, size_t Size, size_t Count);
     void Bind();
     void UnBind();
     void Draw();

@@ -10,7 +10,7 @@
 #include "Core/UpdateManager.hpp"
 #include "Object/Skybox.hpp"
 #include "Object/Asteroids/Asteroid.hpp"
-#include "Object/Ship/ShipCollider.hpp"
 #include "Object/Ship/PlayerShip.hpp"
+#include "InterfaceObject/InterfaceManager.hpp"
 
 #endif

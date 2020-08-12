@@ -1,7 +1,8 @@
 #include "Window.hpp"
+#include "../InterfaceObject/InterfaceManager.hpp"
 
 GLFWwindow* Window::window;
-
+Matrix4 Window::OrthoProjection;
 
 int Window::Setup() {
     
@@ -25,6 +26,8 @@ int Window::Setup() {
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glEnable(GL_DEPTH_TEST);
+    OrthoProjection = Matrix4::Ortho(0, 1280, 0, 720);
+
     return 0;
 }
 
@@ -78,4 +81,6 @@ void Window::errorCallback(int error_code, const char* description) {
 
 void Window::framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+    InterfaceManager::Canvas->Size = Vector2(width, height);
+    OrthoProjection = Matrix4::Ortho(0, width, 0, height);
 }

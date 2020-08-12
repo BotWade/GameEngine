@@ -35,21 +35,11 @@ void PlayerShip::Update() {
         Camera::OriginalPos = StartPosition + Vector3(0, 0, Camera::Zoom);
         Camera::Center = StartPosition;
 
-        if (distance > 1) {
-
-            Quaternion lookRotation = Quaternion::LookRotation(StartPosition, MovementTarget);
-
-            //If Source And Target Are Equal lookRotation Becomes Broken (nan, nan, nan, nan) this way we can test if it is broken
-            if (lookRotation.Quat.X == lookRotation.Quat.X)
-                object->transform.localRotation = Quaternion::Slerp(object->transform.localRotation, lookRotation, TimeHelper::GetDeltaTime());
-        }
-        else {
-            Quaternion lookRotation = Quaternion::LookRotation(StartPosition, object->transform.localPosition);
-            
-            //If Source And Target Are Equal lookRotation Becomes Broken (nan, nan, nan, nan) this way we can test if it is broken
-            if (lookRotation.Quat.X == lookRotation.Quat.X)
-                object->transform.localRotation = Quaternion::Slerp(object->transform.localRotation, lookRotation, TimeHelper::GetDeltaTime());
-        }
+        Quaternion lookRotation = Quaternion::LookRotation(StartPosition, (distance > 1 ? MovementTarget : object->transform.localPosition));
+        
+        //If Source And Target Are Equal lookRotation Becomes Broken (nan, nan, nan, nan) this way we can test if it is broken
+        if (lookRotation.Quat.X == lookRotation.Quat.X)
+            object->transform.localRotation = Quaternion::Slerp(object->transform.localRotation, lookRotation, TimeHelper::GetDeltaTime());
     }
 
     Ship::Update();

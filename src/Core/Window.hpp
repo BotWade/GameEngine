@@ -5,11 +5,11 @@
 
 #include "Debug.hpp"
 #include "Input.hpp"
-#include "../Math/Vector2.hpp"
-
+#include "../Math/Matrix4.hpp"
 class Window {
 public:
     static GLFWwindow* window;
+    static Matrix4 OrthoProjection;
 
     static void MouseCallback(GLFWwindow* window, double xPos, double yPos);
     static int Setup();

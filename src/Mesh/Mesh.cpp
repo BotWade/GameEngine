@@ -9,6 +9,7 @@ bool Mesh::LoadMesh(const char* FilePath) {
 
     Data = loader.LoadedMeshes[0].Vertices;
     Indices = loader.LoadedIndices;
+    IndexSize = Indices.size();
     
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -23,6 +24,25 @@ bool Mesh::LoadMesh(const char* FilePath) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices[0]) * Indices.size(), Indices.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
+
+    return true;
+}
+
+bool Mesh::LoadEmptyMesh(size_t DataSize, size_t IndexSize) {
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, DataSize, NULL, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, IndexSize, NULL, GL_DYNAMIC_DRAW);
+
+    glBindVertexArray(0);
+
 
     return true;
 }
@@ -52,6 +72,19 @@ void Mesh::ProcessAttributes(int Type, unsigned long TypeSize, Shader* shader) {
     glBindVertexArray(0);
 }
 
+void Mesh::UpdateData(void* data, size_t Size) {
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, Size, data);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Mesh::UpdateIndex(void* data, size_t Size, size_t Count) {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, Size, data);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    IndexSize = Count;
+}
+
 void Mesh::Bind() {
     glBindVertexArray(VAO);
 }
@@ -61,5 +94,5 @@ void Mesh::UnBind() {
 }
 
 void Mesh::Draw() {
-    glDrawElements(GL_TRIANGLES, Indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, IndexSize, GL_UNSIGNED_INT, 0);
 }

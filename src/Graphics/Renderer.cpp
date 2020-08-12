@@ -35,9 +35,6 @@ void Renderer::Init() {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
-        Vector2 WinSize = Window::GetSize();
-
-        fontMesh.Projection = Matrix4::Ortho(0, WinSize.X, 0, WinSize.Y);
         defaultFontShader->UnBind();
     }
 
@@ -100,7 +97,7 @@ void Renderer::DrawText(string FontName, string Text, Vector2 Position, float Sc
     
     shader->Bind();
     glUniform3f(shader->GetUniformId("textColor"), Color.X, Color.Y, Color.Z);
-    glUniformMatrix4fv(shader->GetUniformId("projection"), 1, GL_FALSE, &fontMesh.Projection.col0.X);
+    glUniformMatrix4fv(shader->GetUniformId("projection"), 1, GL_FALSE, &Window::OrthoProjection.col0.X);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(fontMesh.VAO);
 

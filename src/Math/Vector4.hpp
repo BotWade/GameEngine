@@ -12,6 +12,7 @@ struct Vector4 {
 
     Vector4();
     Vector4(Vector2 Xy, float z, float w);
+    Vector4(Vector2 Xy, Vector2 Zw);
     Vector4(Vector3 Xyz);
     Vector4(Vector3 Xyz, float w);
     Vector4(float value);
