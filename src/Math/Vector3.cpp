@@ -134,4 +134,6 @@ float& Vector3::operator[](int Index) {
                 return Z;
             break;
     }
+
+    return X;
 }

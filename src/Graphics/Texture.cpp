@@ -1,7 +1,7 @@
 #include "Texture.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image"
+#include "include/stb_image"
 
 bool Texture::LoadFile(const char* Path) {
 
