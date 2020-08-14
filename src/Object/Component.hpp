@@ -13,6 +13,8 @@ public:
     virtual void OnCollision(RayTestResult result);
     virtual void Render();
     virtual void PosRender();
+
+    ~Component();
 };
 
 #endif

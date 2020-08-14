@@ -19,7 +19,7 @@ public:
     static Vector2 ScrollOffset;
     
     static void Clear();
-    
+    static void InputClear();
     static bool GetKey(int KeyCode);
     static bool GetKeyDown(int KeyCode);
     static bool GetKeyUp(int KeyCode);

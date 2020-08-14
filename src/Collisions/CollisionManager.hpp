@@ -34,6 +34,7 @@ public:
   static void ProcessRay(Ray ray, Component* caller);
   static void ColliderVsRay(Ray ray);
   static vector<Hit*> ColliderVsRay(Ray ray, bool getIntersection = false);
+  static void Clear();
 };
 
 #endif

@@ -21,3 +21,8 @@ Mesh* MeshManager::GetMesh(const char* Location) {
     meshes.push_back(mesh);
     return mesh;
 }
+
+void MeshManager::Clear() {
+    meshes.clear();
+    meshes.shrink_to_fit();
+}

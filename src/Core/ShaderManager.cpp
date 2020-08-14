@@ -21,3 +21,9 @@ Shader* ShaderManager::GetShader(const char* Location) {
     shaders.push_back(shader);
     return shader;
 }
+
+void ShaderManager::Clear() {
+
+    shaders.clear();
+    shaders.shrink_to_fit();
+}

@@ -19,6 +19,7 @@ public:
     static void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
     static void errorCallback(int error_code, const char* description);
     static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+    static void Clear();
 };
 
 #endif

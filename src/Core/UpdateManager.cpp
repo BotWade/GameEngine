@@ -25,19 +25,26 @@ void UpdateManager::Update() {
 
     size_t Size = Groups.size(); 
 
-    for (size_t Index = 0; Index < Size; Index++) {
+    for (size_t Index = 0; Index < Size; Index++)
         Groups[Index]->Update = true;
-    }
 
     bool Working = true;
 
     while (Working) {
         Size = Groups.size();
         Working = false;
-
-        for (size_t Index = 0; Index < Size; Index++) {
+        for (size_t Index = 0; Index < Size; Index++)
             if (Groups[Index]->Update)
                 Working = true;
-        }
     }
+}
+
+void UpdateManager::Clear() {
+
+    size_t Size = Groups.size();
+    for (size_t Index = 0; Index < Size; Index++)
+        Groups[Index]->Working = false;
+    
+    Groups.clear();
+    Groups.shrink_to_fit();
 }

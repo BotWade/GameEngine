@@ -48,3 +48,8 @@ bool Input::GetMouseButtonUp(int KeyCode) {
 
     return Mouse.count(KeyCode) && Mouse[KeyCode] == GLFW_RELEASE;
 }
+
+void Input::InputClear() {
+    Keyboard.clear();
+    Mouse.clear();
+}

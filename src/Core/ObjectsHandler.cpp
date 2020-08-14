@@ -43,3 +43,8 @@ void ObjectsHandler::ExecuteCode(ExecutionCode code) {
 void ObjectsHandler::AddObject(Object* object) {
     Objects.push_back(object);
 }
+
+void ObjectsHandler::Clear() {
+    Objects.clear();
+    Objects.shrink_to_fit();
+}

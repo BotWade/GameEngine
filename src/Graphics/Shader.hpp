@@ -30,6 +30,8 @@ public:
     void Bind();
     void UnBind();
     unsigned int GetUniformId(string Name);
+
+    ~Shader();
 };
 
 #endif

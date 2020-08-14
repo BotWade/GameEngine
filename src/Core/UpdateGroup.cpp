@@ -11,8 +11,11 @@ void UpdateGroup::Work() {
 
     while (Working) {
         
-        while (!Update) {}
+        while (!Update && Working) {}
         
+        if (!Working)
+            return;
+
         auto Pre = high_resolution_clock::now();
 
         size_t Size = Objects.size();
@@ -25,4 +28,11 @@ void UpdateGroup::Work() {
         auto Now = high_resolution_clock::now();
         UpdateTime = duration_cast<milliseconds>(Now - Pre);
     }
+}
+
+UpdateGroup::~UpdateGroup() {
+    Working = false;
+    Update = false;
+    Objects.clear();
+    Objects.shrink_to_fit();
 }

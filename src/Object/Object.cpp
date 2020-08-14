@@ -41,3 +41,12 @@ void Object::ExecuteCode(ExecutionCode code) {
     for (size_t Index = 0; Index < Size; Index++)
         Children[Index]->ExecuteCode(code);
 }
+
+Object::~Object() {
+    transform.object = nullptr;
+    Parent = nullptr;
+    Components.clear();
+    Components.shrink_to_fit();
+    Children.clear();
+    Children.shrink_to_fit();
+}

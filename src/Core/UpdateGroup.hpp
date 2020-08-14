@@ -19,6 +19,7 @@ public:
     std::chrono::milliseconds UpdateTime;
     void Init();
     void Work();
+    ~UpdateGroup();
 };
 
 #endif

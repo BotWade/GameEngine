@@ -96,3 +96,14 @@ void Mesh::UnBind() {
 void Mesh::Draw() {
     glDrawElements(GL_TRIANGLES, IndexSize, GL_UNSIGNED_INT, 0);
 }
+
+Mesh::~Mesh() {
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &VBO);
+    delete[] Path;
+    Data.clear();
+    Data.shrink_to_fit();
+    Indices.clear();
+    Indices.shrink_to_fit();
+}

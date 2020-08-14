@@ -32,6 +32,8 @@ public:
     void Bind();
     void UnBind();
     void Draw();
+
+    ~Mesh();
 };
 
 #endif

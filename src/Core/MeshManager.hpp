@@ -12,6 +12,7 @@ public:
 
     static void Init();
     static Mesh* GetMesh(const char* Location);
+    static void Clear();
 };
 
 #endif

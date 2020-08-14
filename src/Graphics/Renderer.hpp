@@ -21,6 +21,7 @@ public:
 
     static void Init();
     static void Clear();
+    static void RendererClear();
     static void Swap();
     static void UpdateMatrix();
     static void DrawRay(Ray ray, float Distance = 10.0f, Vector3 Color = Vector3(1, 0, 0));

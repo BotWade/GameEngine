@@ -145,3 +145,20 @@ int Renderer::DrawLetter(Font* font, char Letter, Vector2 Position, float Scale)
 
     return ch.Advance;
 }
+
+void Renderer::RendererClear() {
+
+    size_t Size = fonts.size();
+    for (size_t Index = 0; Index < Size; Index++)
+        FT_Done_Face(fonts[Index]->FontFace);
+    FT_Done_Face(defaultFont->FontFace);
+    FT_Done_FreeType(freeTypeLibrary);
+
+    fonts.clear();
+    fonts.shrink_to_fit();
+    delete defaultFontShader;
+    delete defaultFont;
+    
+    glDeleteBuffers(1, &fontMesh.VBO);
+    glDeleteVertexArrays(1, &fontMesh.VAO);
+}

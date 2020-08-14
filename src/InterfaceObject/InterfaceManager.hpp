@@ -10,12 +10,13 @@ using namespace std;
 
 class InterfaceManager {
 public:
-    static InterfaceObject* Canvas;
     static vector<InterfaceObject*> Objects;
+    static InterfaceObject* Canvas;
 
     static void Init();
     static void AddObject(InterfaceObject* Object);
     static void ExecuteCode(ExecutionCode code);
+    static void Clear();
 };
 
 #endif

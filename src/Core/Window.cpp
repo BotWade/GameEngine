@@ -84,3 +84,8 @@ void Window::framebufferSizeCallback(GLFWwindow* window, int width, int height) 
     InterfaceManager::Canvas->Size = Vector2(width, height);
     OrthoProjection = Matrix4::Ortho(0, width, 0, height);
 }
+
+void Window::Clear() {
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}

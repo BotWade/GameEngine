@@ -91,3 +91,12 @@ vector<Hit*> CollisionManager::ColliderVsRay(Ray ray, bool getIntersection) {
 
     return hit;
 }
+
+void CollisionManager::Clear()  {
+
+    Colliders.clear();
+    Colliders.shrink_to_fit();
+    Result.clear();
+    Result.shrink_to_fit();
+    Work.clear();
+}

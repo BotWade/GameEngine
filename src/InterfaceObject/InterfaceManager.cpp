@@ -1,13 +1,14 @@
 #include "InterfaceManager.hpp"
 #include "../Core/Window.hpp"
 
-InterfaceObject* InterfaceManager::Canvas;
 vector<InterfaceObject*> InterfaceManager::Objects;
+InterfaceObject* InterfaceManager::Canvas;
 
 void InterfaceManager::Init() {
     Canvas = new InterfaceObject();
     Canvas->Size = Window::GetSize();
     Canvas->Position = Vector2(0, 0);
+    Objects = vector<InterfaceObject*>();
 }
 
 void InterfaceManager::AddObject(InterfaceObject* Object) {
@@ -33,4 +34,10 @@ void InterfaceManager::ExecuteCode(ExecutionCode code) {
             break;
         }
     }
+}
+
+void InterfaceManager::Clear() {
+
+    Objects.clear();
+    Objects.shrink_to_fit();
 }

@@ -12,6 +12,7 @@ public:
 
     static void Init();
     static Shader* GetShader(const char* Location);
+    static void Clear();
 };
 
 #endif

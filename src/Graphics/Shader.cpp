@@ -148,3 +148,14 @@ unsigned int Shader::GetUniformId(string Name) {
 
     return 0;
 }
+
+Shader::~Shader() {
+    
+    glDeleteShader(VertexId);
+    glDeleteShader(FragmentId);
+    glDeleteProgram(ProgramId);
+    Attributes.clear();
+    Attributes.shrink_to_fit();
+    Uniforms.clear();
+    Uniforms.shrink_to_fit();
+}

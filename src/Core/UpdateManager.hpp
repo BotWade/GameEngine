@@ -13,6 +13,7 @@ public:
     static void CreateGroup(string Name);
     static void AddToGroup(string Name, Object* object);
     static void Update();
+    static void Clear();
 
 };
 

@@ -24,6 +24,7 @@ public:
     static void Load();
     static void ExecuteCode(ExecutionCode code);
     static void AddObject(Object* object);
+    static void Clear();
 };
 
 #endif
