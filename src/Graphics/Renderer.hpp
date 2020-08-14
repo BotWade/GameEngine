@@ -29,6 +29,9 @@ public:
     static void DrawTriangle(Triangle triangle, Vector3 Color = Vector3(1, 0, 0));
     static void DrawText(string FontName, string Text, Vector2 Position, float Scale, Vector3 Color, Shader* shader = defaultFontShader);
     static int DrawLetter(Font* font,char Letter, Vector2 Position, float Scale);
+    static void SetScissor(Vector4 Region);
+    static void SetScissorDefault();
+    static void SetDepthMask(bool Active);
 };
 
 #endif

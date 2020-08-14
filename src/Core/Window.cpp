@@ -54,6 +54,9 @@ void Window::MouseCallback(GLFWwindow* window, double xPos, double yPos) {
     Input::MousePosition.X = xPos;
     Input::MousePosition.Y = yPos;
 
+    Input::MousePositionYInv.X = xPos;
+    Input::MousePositionYInv.Y = GetSize().Y - yPos;
+
     Input::MouseOffset.X = Input::LastMousePosition.X - Input::MousePosition.X;
     Input::MouseOffset.Y = Input::LastMousePosition.Y - Input::MousePosition.Y;
 }

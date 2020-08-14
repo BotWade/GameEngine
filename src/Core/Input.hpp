@@ -14,6 +14,7 @@ public:
     static map<int, int> Mouse;
 
     static Vector2 MousePosition;
+    static Vector2 MousePositionYInv;
     static Vector2 LastMousePosition;
     static Vector2 MouseOffset;
     static Vector2 ScrollOffset;

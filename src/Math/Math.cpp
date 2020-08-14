@@ -24,6 +24,12 @@ bool is_number(const string& s) {
         s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
 }
 
+bool IsPointInsideRect(Vector2 Point, Vector4 Rectangle) {
+    if (Point.X >= Rectangle.X && Point.X <= Rectangle.X + Rectangle.Z && Point.Y >= Rectangle.Y && Point.Y <= Rectangle.Y + Rectangle.W)
+        return true;
+    return false;
+}
+
 Vector3 Cross(const Vector3 Left, const Vector3 Right) {
 
     return Vector3(Left.Y * Right.Z - Right.Y * Left.Z,

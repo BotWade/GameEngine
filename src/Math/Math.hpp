@@ -22,6 +22,9 @@ unsigned short getShort(unsigned char* array, int offset);
 unsigned int getInt32(unsigned char* array, int offset);
 bool is_number(const string& s);
 
+
+bool IsPointInsideRect(Vector2 Point, Vector4 Rectangle);
+
 Vector3 Cross(const Vector3 Left, const Vector3 Right);
 Vector3 Projection(const Vector3 Left, const Vector3 Right);
 Vector3 Normalize(Vector3 Input);

@@ -6,12 +6,10 @@
 InterfaceObject::InterfaceObject() {
 
     xConstraint = yConstraint = wConstraint = hConstraint = PIXEL;
-    yConstraint = RELATIVE;
-    hConstraint = RELATIVE;
     BackgroundColor = Vector4(1, 1, 1, 1);
     ForegroundColor = Vector4(0, 0, 0, 1);
-    Position = Vector2(100, 10);
-    Size = Vector2(100, 80);
+    Position = Vector2(100, 100);
+    Size = Vector2(100, 100);
 
     Children = vector<InterfaceObject*>();
 }

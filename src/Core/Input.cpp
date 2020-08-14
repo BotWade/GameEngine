@@ -3,6 +3,7 @@
 map<int, int> Input::Keyboard = map<int, int>();
 map<int, int> Input::Mouse = map<int, int>();
 Vector2 Input::MousePosition = Vector2();
+Vector2 Input::MousePositionYInv = Vector2();
 Vector2 Input::LastMousePosition = Vector2();
 Vector2 Input::MouseOffset = Vector2();
 Vector2 Input::ScrollOffset = Vector2();
@@ -13,7 +14,7 @@ void Input::Clear() {
     MouseOffset.Y = 0;
     ScrollOffset.X = 0;
     ScrollOffset.Y = 0;
-
+    
     for (map<int, int>::iterator it = Mouse.begin(); it != Mouse.end(); ++it)
         if (it->second == GLFW_PRESS)
             it->second++;

@@ -3,12 +3,14 @@
 
 vector<InterfaceObject*> InterfaceManager::Objects;
 InterfaceObject* InterfaceManager::Canvas;
+bool InterfaceManager::Interacted;
 
 void InterfaceManager::Init() {
     Canvas = new InterfaceObject();
     Canvas->Size = Window::GetSize();
     Canvas->Position = Vector2(0, 0);
     Objects = vector<InterfaceObject*>();
+    Interacted = false;
 }
 
 void InterfaceManager::AddObject(InterfaceObject* Object) {

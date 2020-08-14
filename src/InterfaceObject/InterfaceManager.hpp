@@ -12,6 +12,7 @@ class InterfaceManager {
 public:
     static vector<InterfaceObject*> Objects;
     static InterfaceObject* Canvas;
+    static bool Interacted;
 
     static void Init();
     static void AddObject(InterfaceObject* Object);

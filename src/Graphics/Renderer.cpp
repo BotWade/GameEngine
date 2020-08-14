@@ -38,6 +38,7 @@ void Renderer::Init() {
         defaultFontShader->UnBind();
     }
 
+    glEnable(GL_SCISSOR_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -161,4 +162,17 @@ void Renderer::RendererClear() {
     
     glDeleteBuffers(1, &fontMesh.VBO);
     glDeleteVertexArrays(1, &fontMesh.VAO);
+}
+
+void Renderer::SetScissor(Vector4 Region) {
+    glScissor(Region.X, Region.Y, Region.Z, Region.W);
+}
+
+void Renderer::SetScissorDefault() {
+    Vector2 WinSize = Window::GetSize();
+    glScissor(0, 0, WinSize.X, WinSize.Y);
+}
+
+void Renderer::SetDepthMask(bool Active) {
+    glDepthMask(Active ? GL_TRUE : GL_FALSE);
 }
