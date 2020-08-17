@@ -1,10 +1,11 @@
 #include "Skybox.hpp"
 #include "../Core/MeshManager.hpp"
 #include "../Core/ShaderManager.hpp"
+#include "../Core/TextureManager.hpp"
 
 void Skybox::LoadSkybox(const char* Skybox, const char* Mesh, const char* Shader) {
 
-    texture.LoadCubemap(Skybox);
+    texture = TextureManager::GetTexture(Skybox, CUBEMAP);
     shader = ShaderManager::GetShader(Shader);
 
     mesh = MeshManager::GetMesh(Mesh);
@@ -19,7 +20,7 @@ void Skybox::Update() {
 void Skybox::PosRender() {
     
     glDepthFunc(GL_LEQUAL);
-    texture.Bind();
+    texture->Bind();
     shader->Bind();
     
     Matrix4 View = Camera::Projection * Matrix4(Matrix3(Camera::View));
@@ -29,7 +30,7 @@ void Skybox::PosRender() {
     mesh->Draw();
     mesh->UnBind();
 
-    texture.UnBind();
+    texture->UnBind();
     shader->UnBind();
     glDepthFunc(GL_LESS);
 }

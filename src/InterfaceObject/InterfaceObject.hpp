@@ -17,6 +17,8 @@ enum ConstraintMode {
 
 class InterfaceObject {
 public:
+    bool Active;
+    
     Shader* shader;
     Mesh* mesh;
 

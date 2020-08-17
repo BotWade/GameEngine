@@ -14,7 +14,7 @@
 
 class Skybox : public Component {
 public:
-    Texture texture;
+    Texture* texture;
     Shader* shader;
     Mesh* mesh;
 

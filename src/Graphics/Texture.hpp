@@ -9,6 +9,7 @@
 class Texture {
 public:
     unsigned int TextureId;
+    const char* path;
     int Width;
     int Height;
     int nrChannels;

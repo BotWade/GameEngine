@@ -5,6 +5,8 @@
 
 bool Texture::LoadFile(const char* Path) {
 
+    path = Path;
+
     glGenTextures(1, &TextureId);
     glBindTexture(GL_TEXTURE_2D, TextureId);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -12,7 +14,7 @@ bool Texture::LoadFile(const char* Path) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    if (FileManager::FileExists((FileManager::GetGamePath() + (string)Path).c_str())) {
+    if (!FileManager::FileExists((FileManager::GetGamePath() + (string)Path).c_str())) {
         
         Debug::Alert("Texture doesn't exist - " + (string)Path);
         return false;
@@ -36,6 +38,8 @@ bool Texture::LoadFile(const char* Path) {
 }
 
 bool Texture::LoadCubemap(const char* Path) {
+
+    path = Path;
 
     glGenTextures(1, &TextureId);
     glBindTexture(GL_TEXTURE_CUBE_MAP, TextureId);

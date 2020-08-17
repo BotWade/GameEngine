@@ -10,12 +10,14 @@ InterfaceObject::InterfaceObject() {
     ForegroundColor = Vector4(0, 0, 0, 1);
     Position = Vector2(100, 100);
     Size = Vector2(100, 100);
+    Active = true;
 
     Children = vector<InterfaceObject*>();
 }
 
 void InterfaceObject::Load() {
-    LoadObject("Data/Shaders/Interface.shader");
+    if (shader == nullptr)
+        LoadObject("Data/Shaders/Interface.shader");
     mesh = new Mesh();
     mesh->LoadEmptyMesh(sizeof(float) * 4 * 2, sizeof(int) * 6);
 
