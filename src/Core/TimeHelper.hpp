@@ -2,17 +2,20 @@
 #define _TIMEHELPER_
 
 #include <time.h>
+#include <ctime>
+#include <chrono>
+
+using namespace std::chrono;
+using ms = std::chrono::duration<float, std::milli>;
 
 class TimeHelper {
     
 private:
-    static float LastTime;
+    static std::chrono::system_clock::time_point LastTime;
     static float DeltaTime;
-    
 public:
-static float GetTicks() { return (float)clock() / (float)CLOCKS_PER_SEC; }
-    static float GetDeltaTime() { return DeltaTime; } 
-    static void Start() { LastTime = GetTicks(); }
-    static void Update() { DeltaTime = (GetTicks() - LastTime); LastTime = GetTicks(); }
+    static float GetDeltaTime() { return DeltaTime / 1000.0f; } 
+    static void Start() { LastTime = high_resolution_clock::now(); }
+    static void Update() { DeltaTime = duration_cast<ms>(high_resolution_clock::now() - LastTime).count(); LastTime = high_resolution_clock::now(); }
 };
 #endif

@@ -12,7 +12,7 @@ Shader* ShaderManager::GetShader(const char* Location) {
     size_t Size = shaders.size();
     
     for (int Index = 0; Index < Size; Index++) {
-        if (shaders[Index]->Path == Location)
+        if (shaders[Index]->FilePath == Location)
             return shaders[Index];
     }
 
@@ -24,6 +24,9 @@ Shader* ShaderManager::GetShader(const char* Location) {
 
 void ShaderManager::Clear() {
 
+    for (Shader* shader: shaders)
+        shader->Clean();
+        
     shaders.clear();
     shaders.shrink_to_fit();
 }

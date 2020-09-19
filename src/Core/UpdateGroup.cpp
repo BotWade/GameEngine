@@ -26,7 +26,7 @@ void UpdateGroup::Work() {
         Update = false;
         
         auto Now = high_resolution_clock::now();
-        UpdateTime = duration_cast<milliseconds>(Now - Pre);
+        UpdateTime = duration_cast<nanoseconds>(Now - Pre);
     }
 }
 

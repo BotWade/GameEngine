@@ -11,7 +11,7 @@ Mesh* MeshManager::GetMesh(const char* Location) {
 
     size_t Size = meshes.size();
     
-    for (int Index = 0; Index < Size; Index++) {
+    for (size_t Index = 0; Index < Size; Index++) {
         if (meshes[Index]->Path == Location)
             return meshes[Index];
     }
@@ -23,6 +23,10 @@ Mesh* MeshManager::GetMesh(const char* Location) {
 }
 
 void MeshManager::Clear() {
+
+    for (Mesh* mesh : meshes)
+        mesh->Clean();
+
     meshes.clear();
     meshes.shrink_to_fit();
 }

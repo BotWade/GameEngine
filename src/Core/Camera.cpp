@@ -2,6 +2,7 @@
 #include "TimeHelper.hpp"
 #include "../Math/Matrix3.hpp"
 #include "../Graphics/Renderer.hpp"
+#include "math.h"
 
 float Camera::Zoom;
 Vector3 Camera::Position;
@@ -27,7 +28,7 @@ void Camera::Update() {
     
     float y = 0.0f;
     float x = 0.0f;
-    float Speed = 0.5f;
+    float Speed = 2.0f;
     float WheelSpeed = 0.5f;
 
     if (Input::ScrollOffset != Vector2(0, 0)) {
@@ -54,9 +55,6 @@ void Camera::Update() {
     
     Vector2 WindowSize = Window::GetSize();
     Projection = Matrix4::PerspectiveFovLH(Radians(45.0f), WindowSize.X, WindowSize.Y, 0.1f, 1000.0f);
-
+    Projection.col1.Y *= -1;
     ProjectionView = Projection * View;
-
-
-    Renderer::UpdateMatrix();
 }

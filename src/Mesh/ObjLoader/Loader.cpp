@@ -1,4 +1,5 @@
 #include "Loader.hpp"
+#include "math.h"
 
 Loader::~Loader() {
     LoadedMeshes.clear();

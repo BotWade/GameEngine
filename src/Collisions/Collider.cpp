@@ -1,6 +1,5 @@
 #include "Collider.hpp"
 #include "../Core/ObjectsHandler.hpp"
-#include "../Object/RayDrawer.hpp"
 
 //#define BACKFACE_CULLING
 

@@ -1,9 +1,21 @@
 #include "Math.hpp"
 #include "../Core/Window.hpp"
+#include "../Core/Camera.hpp"
 #include "Vector3.hpp"
 #include "Vector4.hpp"
 #include "Matrix4.hpp"
-#include "../Core/Camera.hpp"
+#include "Quaternion.hpp"
+#include "math.h"
+
+vector<string> Explode(string const & s, char delim) {
+    vector<string> result;
+    istringstream iss(s);
+
+    for (string token; getline(iss, token, delim); )
+        result.push_back(move(token));
+
+    return result;
+}
 
 unsigned short getShort(unsigned char* array, int offset) {
     
@@ -103,9 +115,9 @@ Vector3 RotateZ(Vector3 Origin, Vector3 Point, float Deg) {
     );
 }
 
-Vector3 Screen2World(Vector2 Screen) {
+Vector3 Screen2World(Vector2 MousePosition) {
     Vector2 Size = Window::GetSize();
-    Vector3 ray_nds = Vector3((2.0f * Screen.X) / Size.X - 1.0f, 1.0f - (2.0f * Screen.Y) / Size.Y, 1.0f);
+    Vector3 ray_nds = Vector3((2.0f * MousePosition.X) / Size.X - 1.0f, 1.0f - (2.0f * MousePosition.Y) / Size.Y, 1.0f);
     Vector4 Ray_Clip = Vector4(ray_nds.Xy(), 1.0, 1.0);
     Vector4 Ray_eye = Vector4((Matrix4::Inverse(Camera::Projection) * Ray_Clip).Xy(), 1.0, 0.0);
     return Normalize((Matrix4::Inverse(Camera::View) * Ray_eye).Xyz());
@@ -113,6 +125,10 @@ Vector3 Screen2World(Vector2 Screen) {
 
 Vector3 Abs(Vector3 Input) {
     return Vector3(abs(Input.X), abs(Input.Y), abs(Input.Z));
+}
+
+Vector2 Abs(Vector2 Input) {
+    return Vector2(abs(Input.X), abs(Input.Y));
 }
 
 float MaxDim(Vector3 Input) {

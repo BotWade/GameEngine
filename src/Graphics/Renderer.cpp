@@ -1,178 +1,247 @@
 #include "Renderer.hpp"
 #include "../Core/Debug.hpp"
-#include "../Core/ShaderManager.hpp"
 #include "../Core/Camera.hpp"
+#include "Vulkan/Vulkan.hpp"
+#include "Vulkan/VulkanDeviceManager.hpp"
+#include "../Core/ShaderManager.hpp"
+#include "Vulkan/CommandBufferManager.hpp"
+#include "Vulkan/PipelineManager.hpp"
+#include "Vulkan/RenderPassManager.hpp"
+#include "Vulkan/CommandPoolManager.hpp"
+#include <array>
+
+using namespace std;
 
 FT_Library Renderer::freeTypeLibrary;
 bool Renderer::faildToLoadFreetype;
-Font* Renderer::defaultFont;
-FontMeshData Renderer::fontMesh;
-Shader* Renderer::defaultFontShader;
-
 vector<Font*> Renderer::fonts;
+VulkanCommandBuffer* Renderer::ClearCommandBuffer;
+atomic_flag Renderer::QueueInUse;
 
 void Renderer::Init() {
     faildToLoadFreetype = false;
 
     if (FT_Init_FreeType(&freeTypeLibrary)) {
+        Debug::Alert("Failed To Initialize FreeType Library");
         faildToLoadFreetype = true;
-        Debug::Alert("Faild To Load FreeType2");
     }
 
     if (!faildToLoadFreetype) {
-        defaultFontShader = ShaderManager::GetShader("Data/Shaders/Letter.shader");
-        defaultFontShader->Bind();
-        defaultFont = new Font();
-        defaultFont->LoadFont("Data/Fonts/Arial.ttf");
+        Font* font = new Font();
+        font->Name = "Arial";
+        font->shader = ShaderManager::GetShader("Data/Shaders/Letter.shader");
+        VulkanPipeLine* pipeLine;
 
-        glGenVertexArrays(1, &fontMesh.VAO);
-        glGenBuffers(1, &fontMesh.VBO);
-        glBindVertexArray(fontMesh.VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, fontMesh.VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+            //font->shader->GetUniform("MVP")->GenerateUniform(sizeof(Matrix4));
+            //font->shader->GenerateDescriptorSetLayout();
+            pipeLine = new VulkanPipeLine();
+            pipeLine->Name = "Font";
+            pipeLine->PreparePipelineLayout();
+            pipeLine->SetVertexInputInfo(Vertex::GetBindingDescription(), Vertex::GetAttributeDescriptions());
+            //pipeLine->CreatePipelineLayout(font->shader);
+            pipeLine->CreatePipeline(font->shader, RenderPassManager::GetRenderPass("Default"));
+            PipelineManager::AddPipeline(pipeLine);
 
-        defaultFontShader->UnBind();
+        font->pipeLine = pipeLine;
+        font->LoadFont("Data/Fonts/Arial.ttf");
+        fonts.push_back(font);
     }
-
-    glEnable(GL_SCISSOR_TEST);
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Renderer::Clear() {
+    bool NeedProcessing = (ClearCommandBuffer == nullptr || Vulkan::SwapChainRecreated);
 
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (ClearCommandBuffer == nullptr)
+        ClearCommandBuffer = CommandBufferManager::AddCommandBuffer("Clear");
+
+    if (NeedProcessing) {
+        Vulkan::commandBuffer = ClearCommandBuffer;
+        for (size_t Index = 0; Index < ClearCommandBuffer->commandBuffers.size(); Index++) {
+            Vulkan::CurrentCommandBuffer = Index;
+
+            VkCommandBufferBeginInfo beginInfo{};
+            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+            if (vkBeginCommandBuffer(Vulkan::GetCurrentCommandBuffer(), &beginInfo) != VK_SUCCESS)
+                Debug::Error("failed to begin recording command buffer!");
+
+            VkRenderPassBeginInfo renderPassInfo{};
+            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassInfo.renderPass = RenderPassManager::GetRenderPass("Clear")->renderPass;
+            renderPassInfo.framebuffer = Vulkan::GetCurrentFramebuffer();
+            renderPassInfo.renderArea.offset = {0, 0};
+            renderPassInfo.renderArea.extent = Vulkan::swapChainData.Extent;
+
+
+            array<VkClearValue, 2> clearValues{};
+            clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
+            clearValues[1].depthStencil = {1.0f, 0};
+
+            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+            renderPassInfo.pClearValues = clearValues.data();
+
+            vkCmdBeginRenderPass(Vulkan::GetCurrentCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+            vkCmdEndRenderPass(Vulkan::GetCurrentCommandBuffer());
+
+            if (vkEndCommandBuffer(Vulkan::GetCurrentCommandBuffer()) != VK_SUCCESS)
+                Debug::Error("failed to record command buffer!");
+        }
+    }
+
+    CommandBufferManager::AddToQueuePool(ClearCommandBuffer);
 }
 
-void Renderer::UpdateMatrix() {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glLoadMatrixf(&Camera::Projection.col0.X);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf(&Camera::View.col0.X);
+void Renderer::Prepare() {
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = RenderPassManager::GetRenderPass("Default")->renderPass;
+    renderPassInfo.framebuffer = Vulkan::GetCurrentFramebuffer();
+    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.extent = Vulkan::swapChainData.Extent;
+
+    array<VkClearValue, 2> clearValues{};
+    clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
+    clearValues[1].depthStencil = {1.0f, 0};
+
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+    renderPassInfo.pClearValues = clearValues.data();
+
+    vkCmdBeginRenderPass(Vulkan::GetCurrentCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
+SingleTimeCommandData Renderer::BeginSingleTimeCommands() {
+    SingleTimeCommandData Data = SingleTimeCommandData();
+    Data.commandPool = CommandPoolManager::GetCommandPool();
 
-void Renderer::Swap() {
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool = Data.commandPool->commandPool;
+    allocInfo.commandBufferCount = 1;
     
-    glfwSwapBuffers(Window::window);
-    glfwPollEvents();
+    vkAllocateCommandBuffers(VulkanDeviceManager::GetSelectedDevice(), &allocInfo, &Data.commandBuffer);
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(Data.commandBuffer, &beginInfo);
+
+    return Data;
+}
+
+void Renderer::EndSingleTimeCommands(SingleTimeCommandData Data) {
+    vkEndCommandBuffer(Data.commandBuffer);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &Data.commandBuffer;
+
+    while (QueueInUse.test_and_set()) { }
+    vkQueueSubmit(VulkanDeviceManager::GetSelectedGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(VulkanDeviceManager::GetSelectedGraphicsQueue());
+    QueueInUse.clear();
+
+    vkFreeCommandBuffers(VulkanDeviceManager::GetSelectedDevice(), Data.commandPool->commandPool, 1, &Data.commandBuffer);
+    CommandPoolManager::FreeCommandPool(Data.commandPool);
 }
 
 
-void Renderer::DrawRay(Ray ray, float Distance, Vector3 Color) {
-    glBegin(GL_LINE_STRIP);
-        glColor3f(Color.X, Color.Y, Color.Z);
-        glVertex3f(ray.Origin.X, ray.Origin.Y, ray.Origin.Z);
-        Vector3 End = ray.GetPoint(Distance);
-        glVertex3f(End.X, End.Y, End.Z);
-    glEnd();
+void Renderer::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+    SingleTimeCommandData Data = BeginSingleTimeCommands();
+
+    VkBufferCopy copyRegion{};
+    copyRegion.size = size;
+    vkCmdCopyBuffer(Data.commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+    EndSingleTimeCommands(Data);
 }
 
-void Renderer::DrawLine(Vector3 Origin, Vector3 End, Vector3 Color) {
-    glBegin(GL_LINE_STRIP);
-        glColor3f(Color.X, Color.Y, Color.Z);
-        glVertex3f(Origin.X, Origin.Y, Origin.Z);
-        glVertex3f(End.X, End.Y, End.Z);
-    glEnd();}
-
-void Renderer::DrawTriangle(Triangle triangle, Vector3 Color) {
-    glBegin(GL_TRIANGLES);
-        glColor3f(Color.X, Color.Y, Color.Z);
-        glVertex3f(triangle.Pos1.X, triangle.Pos1.Y, triangle.Pos1.Z);
-        glVertex3f(triangle.Pos2.X, triangle.Pos2.Y, triangle.Pos2.Z);
-        glVertex3f(triangle.Pos3.X, triangle.Pos3.Y, triangle.Pos3.Z);
-    glEnd();
-}
-
-void Renderer::DrawText(string FontName, string Text, Vector2 Position, float Scale, Vector3 Color, Shader* shader) {
+uint32_t Renderer::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags) {
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(VulkanDeviceManager::GetSelectedVkPhysicalDevice(), &memProperties);
     
-    if (faildToLoadFreetype)
-        return;
-    
-    shader->Bind();
-    glUniform3f(shader->GetUniformId("textColor"), Color.X, Color.Y, Color.Z);
-    glUniformMatrix4fv(shader->GetUniformId("projection"), 1, GL_FALSE, &Window::OrthoProjection.col0.X);
-    glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(fontMesh.VAO);
+    for (uint32_t Index = 0; Index < memProperties.memoryTypeCount; Index++)
+        if ((typeFilter & (1 << Index)) && (memProperties.memoryTypes[Index].propertyFlags & propertyFlags) == propertyFlags)
+            return Index;
 
+    Debug::Error("Failed To Find Suitable Memory Type!");
+    return -1;
+}
+
+void Renderer::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = size;
+    bufferInfo.usage = usageFlags;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateBuffer(VulkanDeviceManager::GetSelectedDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+        Debug::Error("Failed To Create Buffer!");
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements(VulkanDeviceManager::GetSelectedDevice(), buffer, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, propertyFlags);
+
+    if (vkAllocateMemory(VulkanDeviceManager::GetSelectedDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+        Debug::Error("Failed To Allocate Buffer Memory!");
+
+    vkBindBufferMemory(VulkanDeviceManager::GetSelectedDevice(), buffer, bufferMemory, 0);
+}
+
+void Renderer::DrawText(string FontName, string Text, Vector2 Position, float Scale, Vector3 Color) {
     Font* font = nullptr;
 
-    for (size_t Index = 0; Index < fonts.size(); Index++)
-        if (fonts[Index]->Name == FontName)
-            font = fonts[Index];
-    
-    if (font == nullptr)
-        font = defaultFont;
+    for (Font* f : fonts) {
+        if (f->Name == FontName) {
+            font = f;
+            break;
+        }
+    }
 
-    if (font == nullptr || font->FaildToLoadFont)
+    if (font == nullptr) {
+        Debug::Alert("Error Drawing Text - " + FontName + " Font Doesn't Exist");
         return;
+    }
 
-    for (string::const_iterator c = Text.begin(); c != Text.end(); c++)
-        Position.X += (DrawLetter(font, *c, Position, Scale) >> 6) * Scale;
+    unsigned int Advance = 0;
 
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    shader->UnBind();
+    for (char C : Text) {
+        DrawLetter(font, C, Position + Advance, Scale);
+        Advance += font->Characters[C].Advance;
+    }
 }
 
 int Renderer::DrawLetter(Font* font, char Letter, Vector2 Position, float Scale) {
-    Character ch = font->Characters[Letter];
+    font->DrawLetter(Letter);
+    Character c = font->Characters[Letter];
 
-    Vector2 Pos = Vector2(Position.X + ch.Bearing.X * Scale, Position.Y - (ch.Size.Y - ch.Bearing.Y) * Scale);
-    Vector2 Size = Vector2(ch.Size.X * Scale, ch.Size.Y * Scale);
+    vector<Vertex> Data = c.quad->Data;
+    for (size_t Index; Index < 4; Index++)
+        Data[Index].Position += Position * Scale;
 
-    float Vertices[6][4] = {
-        {Pos.X          , Pos.Y + Size.Y, 0.0f, 0.0f},
-        {Pos.X          , Pos.Y         , 0.0f, 1.0f},
-        {Pos.X + Size.X , Pos.Y         , 1.0f, 1.0f},
-
-        {Pos.X          , Pos.Y + Size.Y, 0.0f, 0.0f},
-        {Pos.X + Size.X , Pos.Y         , 1.0f, 1.0f},
-        {Pos.X + Size.X , Pos.Y + Size.Y, 1.0f, 0.0f}
-    };
-
-    glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-    glBindBuffer(GL_ARRAY_BUFFER, fontMesh.VBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertices), Vertices);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    return ch.Advance;
+    c.quad->UpdateData(Data.data(), sizeof(Data[0]) * Data.size());
 }
 
 void Renderer::RendererClear() {
 
-    size_t Size = fonts.size();
-    for (size_t Index = 0; Index < Size; Index++)
-        FT_Done_Face(fonts[Index]->FontFace);
-    FT_Done_Face(defaultFont->FontFace);
-    FT_Done_FreeType(freeTypeLibrary);
-
-    fonts.clear();
-    fonts.shrink_to_fit();
-    delete defaultFontShader;
-    delete defaultFont;
-    
-    glDeleteBuffers(1, &fontMesh.VBO);
-    glDeleteVertexArrays(1, &fontMesh.VAO);
 }
 
 void Renderer::SetScissor(Vector4 Region) {
-    glScissor(Region.X, Region.Y, Region.Z, Region.W);
+    vkCmdSetScissor(Vulkan::GetCurrentCommandBuffer(), 0, 1, new VkRect2D { (int32_t)Region.X, (int32_t)Region.Y, (uint32_t)Region.Z, (uint32_t)Region.W});
 }
 
 void Renderer::SetScissorDefault() {
     Vector2 WinSize = Window::GetSize();
-    glScissor(0, 0, WinSize.X, WinSize.Y);
+    vkCmdSetScissor(Vulkan::GetCurrentCommandBuffer(), 0, 1, new VkRect2D { 0, 0, (uint32_t)WinSize.X, (uint32_t)WinSize.Y});
 }
 
 void Renderer::SetDepthMask(bool Active) {
-    glDepthMask(Active ? GL_TRUE : GL_FALSE);
+    Vulkan::vkCmdSetDepthTestEnable(Vulkan::GetCurrentCommandBuffer(), Active);
 }

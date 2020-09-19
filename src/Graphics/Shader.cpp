@@ -1,22 +1,19 @@
 #include "Shader.hpp"
-
-enum ReadingMode {
-    VERTEX,
-    FRAGMENT,
-    ATTRIBUTES,
-    UNIFORMS
-};
+#include "../Core/FileManager.hpp"
+#include "../Math/Math.hpp"
+#include "Vulkan/VulkanDeviceManager.hpp"
+#include "Vulkan/Vulkan.hpp"
 
 void Shader::ReadFromFile(const char* ShaderFile) {
-
-    ifstream File;
     
+    ifstream File;
+
     if (!FileManager::GetFile(ShaderFile, File)) {
         Debug::Alert("Shader File - " + (string)ShaderFile + " Not Found");
         return;
     }
 
-    Path = ShaderFile;
+    FilePath = ShaderFile;
 
     string VertexShader = "";
     string FragmentShader = "";
@@ -49,113 +46,81 @@ void Shader::ReadFromFile(const char* ShaderFile) {
         if (ReadingChange)
             ReadingChange = false;
         else {
-            if (readingMode == VERTEX)
-                VertexShader += Line + "\n";
-            else if (readingMode == FRAGMENT)
-                FragmentShader += Line + "\n";
-            else if (readingMode == ATTRIBUTES) {
-                if (is_number(Line))
-                    Attributes.push_back(stoi(Line));
-            }
-            else if (readingMode == UNIFORMS)
-                if (Line != "")
-                    Uniforms.push_back(Uniform(Line));
+            switch (readingMode) {
+                case VERTEX:
+                    VertexShader += FileManager::GetGamePath() + Line;
+                    break;
+                case FRAGMENT:
+                    FragmentShader += FileManager::GetGamePath() + Line;
+                    break;        
+                case ATTRIBUTES:
+                    if (is_number(Line))
+                        Attributes.push_back(stoi(Line));
+                    break;
+                case UNIFORMS:
+                    if (Line != "")
+                        Uniforms.push_back(new Uniform(Line, Uniforms.size()));
+                    break;
+            }            
         }
     }
 
-    char* Error = new char[512];
+    vector<char> VertexData;
+    vector<char> FragmentData;
 
-    if (!CompileShader(VertexShader.c_str(), VertexId, GL_VERTEX_SHADER, Error))
-        Debug::Alert("Faild To Compile Vertex Shader With Error: \n" + (string)Error);
+    if (!FileManager::GetFileBinary(VertexShader, VertexData)) {
+        Debug::Alert("Failed To Load Shader - " + VertexShader);
+        return;
+    }
+    if (!FileManager::GetFileBinary(FragmentShader, FragmentData)) {
+        Debug::Alert("Failed To LOad Shader - "  + FragmentShader);
+        return;
+    }
 
-    if (!CompileShader(FragmentShader.c_str(), FragmentId, GL_FRAGMENT_SHADER, Error))
-        Debug::Alert("Faild To Compile Fragment Shader With Error: \n" + (string)Error);
+    vertShaderModule = CreateShaderModule(VertexData);
+    fragShaderModule = CreateShaderModule(FragmentData);
 
-    if (!CompileProgram(ProgramId, vector<unsigned int>({VertexId, FragmentId}), Error))
-        Debug::Alert("Faild To Link Shader Program With Error: \n" + (string)Error);
+    VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
+    vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+    vertShaderStageInfo.module = vertShaderModule;
+    vertShaderStageInfo.pName = "main";
 
-    for (long unsigned int Index = 0; Index < Uniforms.size(); Index++)
-        Uniforms[Index].Id = glGetUniformLocation(ProgramId, Uniforms[Index].Name.c_str());
+    VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
+    fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    fragShaderStageInfo.module = fragShaderModule;
+    fragShaderStageInfo.pName = "main";
 
-    glDeleteShader(VertexId);
-    glDeleteShader(FragmentId);
+    shaderStages.push_back(vertShaderStageInfo);
+    shaderStages.push_back(fragShaderStageInfo);
 }
 
-bool Shader::CompileShader(const char* ShaderDta, unsigned int& Id, unsigned int ShaderType, char* Error) {
+VkShaderModule Shader::CreateShaderModule(vector<char> &code) {
+    VkShaderModuleCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    createInfo.codeSize = code.size();
+    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-    Id = glCreateShader(ShaderType);
-    glShaderSource(Id, 1, &ShaderDta, NULL);
-    glCompileShader(Id);
+    VkShaderModule shaderModule;
+    if (vkCreateShaderModule(VulkanDeviceManager::GetSelectedDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+        Debug::Error("Failed To Create Shader Module For Shader - " + (string)FilePath);
 
-    return CheckShader(Id, Error);
+    return shaderModule;
 }
 
-bool Shader::CompileProgram(unsigned int& Id, vector<unsigned int> Shaders, char* Error) {
+Uniform* Shader::GetUniform(string Name) {
 
-    Id = glCreateProgram();
+    for (Uniform* uniform : Uniforms)
+        if (uniform->Name == Name)
+            return uniform;
+
+    return nullptr;
+}
+
+void Shader::Clean() {
+
+    vkDestroyShaderModule(VulkanDeviceManager::GetSelectedDevice(), fragShaderModule, nullptr);
+    vkDestroyShaderModule(VulkanDeviceManager::GetSelectedDevice(), vertShaderModule, nullptr);
     
-    int Size = Shaders.size();
-    
-    for (int Index = 0; Index < Size; Index++)
-        glAttachShader(Id, Shaders[Index]);
-
-    glLinkProgram(Id);
-
-    return CheckProgram(ProgramId, Error);
-}
-
-bool Shader::CheckShader(unsigned int ShaderId, char* Error) {
-
-    int success;
-    glGetShaderiv(ShaderId, GL_COMPILE_STATUS, &success);
-
-    if (success)
-        return true;
-
-    glGetShaderInfoLog(ShaderId, 512, NULL, Error);
-
-    return false;
-}
-
-bool Shader::CheckProgram(unsigned int ProgramId, char* Error) {
-
-    int success;
-    glGetProgramiv(ProgramId, GL_LINK_STATUS, &success);
-    
-    if (success)
-        return true;
-
-    glGetProgramInfoLog(ProgramId, 512, NULL, Error);
-    
-    return false;
-}
-
-void Shader::Bind() {
-    glUseProgram(ProgramId);
-}
-
-void Shader::UnBind() {
-    glUseProgram(0);
-}
-
-unsigned int Shader::GetUniformId(string Name) {
-
-    size_t Size = Uniforms.size();
-    
-    for (size_t Index = 0; Index < Size; Index++)
-        if (Uniforms[Index].Name == Name)
-            return Uniforms[Index].Id;
-
-    return 0;
-}
-
-Shader::~Shader() {
-    
-    glDeleteShader(VertexId);
-    glDeleteShader(FragmentId);
-    glDeleteProgram(ProgramId);
-    Attributes.clear();
-    Attributes.shrink_to_fit();
-    Uniforms.clear();
-    Uniforms.shrink_to_fit();
 }

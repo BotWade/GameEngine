@@ -1,6 +1,9 @@
 #ifndef _INPUT_
 #define _INPUT_
 
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 #include <map>
 #include "Window.hpp"
 #include "../Math/Vector2.hpp"

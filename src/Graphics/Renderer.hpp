@@ -1,6 +1,9 @@
 #ifndef _RENDERER_
 #define _RENDERER_
 
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 #include <vector>
 
 #include "Font.hpp"
@@ -8,26 +11,39 @@
 #include "../Core/Window.hpp"
 #include "../Math/Ray.hpp"
 #include "../Math/Triangle.hpp"
+#include "../Mesh/Mesh.hpp"
+
+struct TextUniform {
+    Matrix4 Projection;
+    Vector3 Color;
+};
+
+class VulkanCommandBuffer;
+class VulkanCommandPool;
+
+struct SingleTimeCommandData {
+    VkCommandBuffer commandBuffer;
+    VulkanCommandPool* commandPool;
+};
 
 class Renderer {
 public:
     static FT_Library freeTypeLibrary;
     static bool faildToLoadFreetype;
-    static Font* defaultFont;
-    static FontMeshData fontMesh;
-    static Shader* defaultFontShader;
-
     static vector<Font*> fonts;
-
+    static VulkanCommandBuffer* ClearCommandBuffer;
+    static atomic_flag QueueInUse;
+    
     static void Init();
     static void Clear();
+    static void Prepare();
     static void RendererClear();
-    static void Swap();
-    static void UpdateMatrix();
-    static void DrawRay(Ray ray, float Distance = 10.0f, Vector3 Color = Vector3(1, 0, 0));
-    static void DrawLine(Vector3 Origin, Vector3 End, Vector3 Color = Vector3(1, 0, 0));
-    static void DrawTriangle(Triangle triangle, Vector3 Color = Vector3(1, 0, 0));
-    static void DrawText(string FontName, string Text, Vector2 Position, float Scale, Vector3 Color, Shader* shader = defaultFontShader);
+    static SingleTimeCommandData BeginSingleTimeCommands();
+    static void EndSingleTimeCommands(SingleTimeCommandData commandBuffer);
+    static void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+    static uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
+    static void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+    static void DrawText(string FontName, string Text, Vector2 Position, float Scale, Vector3 Color);
     static int DrawLetter(Font* font,char Letter, Vector2 Position, float Scale);
     static void SetScissor(Vector4 Region);
     static void SetScissorDefault();

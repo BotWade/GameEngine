@@ -1,6 +1,23 @@
 #include "Mesh.hpp"
+#include "../Graphics/Vulkan/VulkanDeviceManager.hpp"
+#include "../Graphics/Vulkan/Vulkan.hpp"
+#include "../Graphics/Renderer.hpp"
+#include "ObjLoader/Loader.hpp"
+#include "../Graphics/Shader.hpp"
+
+Mesh::Mesh() {
+    vertexBuffer = nullptr;
+    vertexBufferMemory = nullptr;
+    indexBuffer = nullptr;
+    indexBufferMemory = nullptr;
+}
 
 bool Mesh::LoadMesh(const char* FilePath) {
+
+    if (!FileManager::FileExists((FileManager::GetGamePath() + FilePath).c_str())) {
+        Debug::Alert("Faild To Mesh Load File - " + (string)FilePath);
+        return false;
+    }
 
     Loader loader;
     loader.LoadFile(FilePath);
@@ -9,48 +26,43 @@ bool Mesh::LoadMesh(const char* FilePath) {
 
     Data = loader.LoadedMeshes[0].Vertices;
     Indices = loader.LoadedIndices;
-    IndexSize = Indices.size();
-    
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    
-    glBindVertexArray(VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Data[0]) * Data.size(), Data.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices[0]) * Indices.size(), Indices.data(), GL_STATIC_DRAW);
-
-    glBindVertexArray(0);
+    UpdateData(Data.data(), sizeof(Data[0]) * Data.size());
+    UpdateIndex(Indices.data(), sizeof(Indices[0]) * Indices.size(), Indices.size());
 
     return true;
 }
 
-bool Mesh::LoadEmptyMesh(size_t DataSize, size_t IndexSize) {
+bool Mesh::LoadPrimitive(Primitive primitive) {
 
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    switch (primitive) {
+        case QUAD:
+            Data = {
+                { Vector3(-1, 1, 0), Vector3(), Vector2(0, 1) },
+                { Vector3( 1, 1, 0), Vector3(), Vector2(1, 1) },
+                { Vector3( 1,-1, 0), Vector3(), Vector2(1, 0) },
+                { Vector3(-1,-1, 0), Vector3(), Vector2(0, 0) }
+            };
+            Indices = {
+                0, 1, 3,
+                1, 2, 3
+            };
+            break;
+    }
+
+    UpdateData(Data.data(), sizeof(Data[0]) * Data.size());
+    UpdateIndex(Indices.data(), sizeof(Indices[0]) * Indices.size(), Indices.size());
+}
+
+unsigned int Mesh::GenerateCustomBuffer(GLenum Target) {
+    unsigned int customBuffer;
     
-    glBindVertexArray(VAO);
+    CustomBuffers.push_back(customBuffer);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, DataSize, NULL, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, IndexSize, NULL, GL_DYNAMIC_DRAW);
-
-    glBindVertexArray(0);
-
-
-    return true;
+    return customBuffer;
 }
 
 void Mesh::ProcessAttributes(int Type, unsigned long TypeSize, Shader* shader) {
-    
-    glBindVertexArray(VAO);
-
     int Stride = 0;
 
     for (auto& n : shader->Attributes)
@@ -59,49 +71,81 @@ void Mesh::ProcessAttributes(int Type, unsigned long TypeSize, Shader* shader) {
     Stride *= TypeSize;
     
     int Offset = 0;
-
     int Size = shader->Attributes.size();
+    
     for (int Index = 0; Index < Size; Index++) {
-        glVertexAttribPointer(Index, shader->Attributes[Index], Type, GL_FALSE, Stride, (void*)(Offset * TypeSize));
-        glEnableVertexAttribArray(Index);
+        attributesDescription.push_back(VkVertexInputAttributeDescription{ 0, Index, static_cast<VkFormat>(Type + shader->Attributes[Index] * 3 - 3), Offset });
         Offset += shader->Attributes[Index];
     }
 
     AttributesProcessed = true;
+}
 
-    glBindVertexArray(0);
+void Mesh::AlocateData(size_t DataSize) {
+    Renderer::CreateBuffer(DataSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, vertexBuffer, vertexBufferMemory);
 }
 
 void Mesh::UpdateData(void* data, size_t Size) {
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, Size, data);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    
+    Renderer::CreateBuffer(Size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+    void* vkData;
+    vkMapMemory(VulkanDeviceManager::GetSelectedDevice(), stagingBufferMemory, 0, Size, 0, &vkData);
+    mempcpy(vkData, data, Size);
+    vkUnmapMemory(VulkanDeviceManager::GetSelectedDevice(), stagingBufferMemory);
+
+    if (vertexBuffer == nullptr)
+        AlocateData(Size);
+
+    Renderer::CopyBuffer(stagingBuffer, vertexBuffer, Size);
+
+    vkDestroyBuffer(VulkanDeviceManager::GetSelectedDevice(), stagingBuffer, nullptr);
+    vkFreeMemory(VulkanDeviceManager::GetSelectedDevice(), stagingBufferMemory, nullptr);
 }
 
 void Mesh::UpdateIndex(void* data, size_t Size, size_t Count) {
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, Size, data);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    Renderer::CreateBuffer(Size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+    void* vkData;
+    vkMapMemory(VulkanDeviceManager::GetSelectedDevice(), stagingBufferMemory, 0, Size, 0, &vkData);
+    memcpy(vkData, data, (size_t) Size);
+    vkUnmapMemory(VulkanDeviceManager::GetSelectedDevice(), stagingBufferMemory);
+
+    Renderer::CreateBuffer(Size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+
+    Renderer::CopyBuffer(stagingBuffer, indexBuffer, Size);
+
+    vkDestroyBuffer(VulkanDeviceManager::GetSelectedDevice(), stagingBuffer, nullptr);
+    vkFreeMemory(VulkanDeviceManager::GetSelectedDevice(), stagingBufferMemory, nullptr);
+
     IndexSize = Count;
 }
 
-void Mesh::Bind() {
-    glBindVertexArray(VAO);
+void Mesh::UpdateCustomBuffer(void* Data, size_t Size, int BufferIndex) {
+    
 }
 
-void Mesh::UnBind() {
-    glBindVertexArray(0);
+void Mesh::Bind() {
+    VkBuffer vertexBuffers[] = { vertexBuffer };
+    VkDeviceSize offsets[] = { 0 };
+    vkCmdBindVertexBuffers(Vulkan::GetCurrentCommandBuffer(), 0, 1, vertexBuffers, offsets);
+    vkCmdBindIndexBuffer(Vulkan::GetCurrentCommandBuffer(), indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 }
 
 void Mesh::Draw() {
-    glDrawElements(GL_TRIANGLES, IndexSize, GL_UNSIGNED_INT, 0);
+    vkCmdDrawIndexed(Vulkan::GetCurrentCommandBuffer(), IndexSize, 1, 0, 0, 0);
 }
 
-Mesh::~Mesh() {
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteVertexArrays(1, &VBO);
-    delete[] Path;
+void Mesh::Clean() {
+    vkDestroyBuffer(VulkanDeviceManager::GetSelectedDevice(), vertexBuffer, nullptr);
+    vkFreeMemory(VulkanDeviceManager::GetSelectedDevice(), vertexBufferMemory, nullptr);
+    vkDestroyBuffer(VulkanDeviceManager::GetSelectedDevice(), indexBuffer, nullptr);
+    vkFreeMemory(VulkanDeviceManager::GetSelectedDevice(), indexBufferMemory, nullptr);
     Data.clear();
     Data.shrink_to_fit();
     Indices.clear();

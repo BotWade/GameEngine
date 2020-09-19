@@ -1,6 +1,7 @@
 #include "Font.hpp"
 #include "Renderer.hpp"
 #include "../Core/FileManager.hpp"
+#include "Vulkan/Vulkan.hpp"
 
 void Font::LoadFont(const char* Path) {
 
@@ -12,38 +13,62 @@ void Font::LoadFont(const char* Path) {
     if (!Renderer::faildToLoadFreetype && FT_New_Face(Renderer::freeTypeLibrary, (FileManager::GetGamePath() + (string)Path).c_str(), 0, &FontFace)) {
         FaildToLoadFont = true;
         Debug::Alert("Faild To Load Font!");
+        return;
     }
 
     FT_Set_Pixel_Sizes(FontFace, 0, 48);
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
     for (unsigned char c = 0; c < 128; c++) {
         if (FT_Load_Char(FontFace, c, FT_LOAD_RENDER)) {
-            Debug::Alert("Faild To Load Font Face - " + c);
+            Debug::Alert("FreeType Failed To Load Glyph " + (string)((char*)c));
             continue;
         }
 
-        unsigned int Texture;
-        glGenTextures(1, &Texture);
-        glBindTexture(GL_TEXTURE_2D, Texture);
+        Character character;
+        character.Size = Vector2(FontFace->glyph->bitmap.width, FontFace->glyph->bitmap.rows);
+        character.texture = new Texture();
+        //character.texture->LoadTexture(FontFace->glyph->bitmap.buffer, character.Size, 1);
+        character.Advance = FontFace->glyph->advance.x;
+        character.Bearing = Vector2(FontFace->glyph->bitmap_left, FontFace->glyph->bitmap_top);
+        character.quad = new Mesh();
+        character.quad->LoadPrimitive(QUAD);
+        character.commandBuffer = CommandBufferManager::GetOrCreate((string)((char*)c));
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, FontFace->glyph->bitmap.width, FontFace->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, FontFace->glyph->bitmap.buffer);
+        Vulkan::commandBuffer = character.commandBuffer;
+        for (size_t Index = 0; Index < character.commandBuffer->commandBuffers.size(); Index++) {
+            Vulkan::CurrentCommandBuffer = Index;
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            VkCommandBufferBeginInfo beginInfo{};
+            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-        Character character =  {
-            Texture,
-            Vector2(FontFace->glyph->bitmap.width, FontFace->glyph->bitmap.rows),
-            Vector2(FontFace->glyph->bitmap_left, FontFace->glyph->bitmap_top),
-            FontFace->glyph->advance.x
-        };
+            if (vkBeginCommandBuffer(Vulkan::GetCurrentCommandBuffer(), &beginInfo) != VK_SUCCESS)
+                Debug::Error("failed to begin recording command buffer!");
+            
+            Renderer::Prepare();
 
+            vkCmdBindPipeline(Vulkan::GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeLine->graphicsPipeline);
+            
+            character.quad->Bind();
+            //shader->BindDescriptors(pipeLine);
+            character.quad->Draw();
+
+            vkCmdEndRenderPass(Vulkan::GetCurrentCommandBuffer());
+
+            if (vkEndCommandBuffer(Vulkan::GetCurrentCommandBuffer()) != VK_SUCCESS)
+                Debug::Error("failed to record command buffer!");
+        }
+        
         Characters.insert(pair<char, Character>(c, character));
-    }
+    }        
+}
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+void Font::DrawLetter(char C) {
+    CommandBufferManager::AddToQueuePool(Characters[C].commandBuffer);
+}
+
+void Font::Clean() {
+    for (std::map<char, Character>::iterator c = Characters.begin(); c != Characters.end(); ++c) {
+        c->second.texture->Clear();
+        c->second.quad->Clean();
+    }
 }

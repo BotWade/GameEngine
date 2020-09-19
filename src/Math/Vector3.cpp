@@ -80,6 +80,11 @@ Vector3 Vector3::operator+(const Vector3& right) const {
     return Vector3(X + right.X, Y + right.Y, Z + right.Z);
 }
 
+Vector3 Vector3::operator+(const Vector2& right) const {
+
+    return Vector3(X + right.X, Y + right.Y, Z);
+}
+
 Vector3 Vector3::operator-(const Vector3& right) const {
 
     return Vector3(X - right.X, Y - right.Y, Z - right.Z);
@@ -113,6 +118,13 @@ Vector3& Vector3::operator+=(const Vector3& right) {
     return *this;
 }
 
+Vector3& Vector3::operator+=(const Vector2& right) {
+    
+    X += right.X;
+    Y += right.Y;
+    return *this;
+}
+
 Vector3& Vector3::operator-=(const Vector3& right) {
 
     X -= right.X;
@@ -136,4 +148,22 @@ float& Vector3::operator[](int Index) {
     }
 
     return X;
+}
+
+vector<VkVertexInputBindingDescription>* Vector3::GetBindingDescription() {
+    vector<VkVertexInputBindingDescription>* bindingDescription = new vector<VkVertexInputBindingDescription>(1);
+    (*bindingDescription)[0].binding = 0;
+    (*bindingDescription)[0].stride = sizeof(Vector3);
+    (*bindingDescription)[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    return bindingDescription;
+}
+
+vector<VkVertexInputAttributeDescription>* Vector3::GetAttributeDescriptions() {
+    vector<VkVertexInputAttributeDescription>* attributeDescriptions = new vector<VkVertexInputAttributeDescription>(1);
+    (*attributeDescriptions)[0].binding = 0;
+    (*attributeDescriptions)[0].location = 0;
+    (*attributeDescriptions)[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+    (*attributeDescriptions)[0].offset = 0;
+
+    return attributeDescriptions;
 }

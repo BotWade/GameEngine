@@ -16,7 +16,8 @@ public:
     string Name;
     thread thrd;
     vector<Object*> Objects;
-    std::chrono::milliseconds UpdateTime;
+    std::chrono::nanoseconds UpdateTime;
+    
     void Init();
     void Work();
     ~UpdateGroup();

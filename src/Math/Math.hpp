@@ -1,11 +1,13 @@
 #ifndef _MATH_
 #define _MATH_
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 
 #include <string>
+#include <vector>
+#include <sstream>
+#include <utility>
 #include <algorithm>
 
 #include "Vector2.hpp"
@@ -18,6 +20,7 @@ struct Quaternion;
 
 using namespace std;
 
+vector<string> Explode(string const & s, char delim);
 unsigned short getShort(unsigned char* array, int offset);
 unsigned int getInt32(unsigned char* array, int offset);
 bool is_number(const string& s);
@@ -35,6 +38,7 @@ Vector3 RotateY(Vector3 Origin, Vector3 Point, float Deg);
 Vector3 RotateZ(Vector3 Origin, Vector3 Point, float Deg);
 Vector3 Screen2World(Vector2 Screen);
 Vector3 Abs(Vector3 Input);
+Vector2 Abs(Vector2 Input);
 
 float MaxDim(Vector3 Input);
 float Dot(const Vector3 Left, const Vector3 Right);

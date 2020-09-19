@@ -1,6 +1,9 @@
 #ifndef _CAMERA_
 #define _CAMERA_
 
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 #include "Window.hpp"
 #include "../Math/Math.hpp"
 #include "../Math/Matrix4.hpp"

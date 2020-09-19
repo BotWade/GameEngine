@@ -7,6 +7,7 @@
 #include <fstream>
 #include <linux/limits.h>
 #include <libgen.h>
+#include <vector>
 
 #include "Debug.hpp"
 
@@ -21,7 +22,7 @@ public:
     static string GetGamePath();
 
     static bool FileExists(const char* FileLocation);
-    
+    static bool GetFileBinary(string& Path, vector<char>& Data);
     static bool GetFile(const char* FileLocation, ifstream& File);
     static bool GetFileHex(const char* FileLocation, ifstream& File);
 };

@@ -1,37 +1,35 @@
 #ifndef _SHADER_
 #define _SHADER_
 
-#define GL_GLEXT_PROTOTYPES
+#include "Uniform.hpp"
+#include "Vulkan/VulkanPipeLine.hpp"
+#include "Vulkan/VulkanDescriptorPool.hpp"
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include <string>
 #include <vector>
 
-#include "../Math/Math.hpp"
-#include "../Core/FileManager.hpp"
-#include "../Core/Debug.hpp"
-#include "Uniform.hpp"
+using namespace std;
 
-class Shader {    
+enum ReadingMode {
+    VERTEX,
+    FRAGMENT,
+    ATTRIBUTES,
+    UNIFORMS
+};
+
+class Shader {
 public:
-    unsigned int ProgramId;
-    unsigned int VertexId;
-    unsigned int FragmentId;
-    
-    const char* Path;
-
+    const char* FilePath;
     vector<int> Attributes;
-    vector<Uniform> Uniforms;
+    vector<Uniform*> Uniforms;
+    vector<VkPipelineShaderStageCreateInfo> shaderStages;
+    VkShaderModule vertShaderModule;
+    VkShaderModule fragShaderModule;
     
     void ReadFromFile(const char* ShaderFile);
-    bool CompileShader(const char* ShaderDta, unsigned int& Id, unsigned int ShaderType, char* Error);
-    bool CompileProgram(unsigned int& Id, vector<unsigned int> Shaders, char* Error);
-    bool CheckShader(unsigned int ShaderId, char* Error);
-    bool CheckProgram(unsigned int ProgramId, char* Error);
-    void Bind();
-    void UnBind();
-    unsigned int GetUniformId(string Name);
-
-    ~Shader();
+    void Clean();
+    Uniform* GetUniform(string Name);
+    VkShaderModule CreateShaderModule(vector<char> &code);
 };
 
 #endif

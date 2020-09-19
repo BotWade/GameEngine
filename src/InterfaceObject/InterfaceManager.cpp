@@ -25,15 +25,24 @@ void InterfaceManager::ExecuteCode(ExecutionCode code) {
 
     for (size_t Index = 0; Index < Size; Index++) {
         switch (code) {
-        case LOAD:
-            Objects[Index]->Load();
-            break;
-        case UPDATE:
-            Objects[Index]->Update();
-            break;
-        case RENDER:
-            Objects[Index]->Render();
-            break;
+            case LOAD:
+                Objects[Index]->Load();
+                break;
+            case UPDATE:
+                Objects[Index]->Update();
+                break;
+            case RENDER:
+                Objects[Index]->Render();
+                break;
+            case PRERENDER:
+                Objects[Index]->PreRender();
+                break;
+            case POSRENDER:
+                Objects[Index]->PosRender();
+                break;
+            case CLEAN:
+                Objects[Index]->Clean();
+                break;
         }
     }
 }

@@ -27,11 +27,17 @@ void Object::ExecuteCode(ExecutionCode code) {
             case UPDATE:
                 Components[Index]->Update();
                 break;
+            case PRERENDER:
+                Components[Index]->PreRender();
+                break;
             case RENDER:
                 Components[Index]->Render();
                 break;
             case POSRENDER:
                 Components[Index]->PosRender();
+                break;
+            case CLEAN:
+                Components[Index]->Clean();
                 break;
         }
     }
@@ -40,13 +46,4 @@ void Object::ExecuteCode(ExecutionCode code) {
 
     for (size_t Index = 0; Index < Size; Index++)
         Children[Index]->ExecuteCode(code);
-}
-
-Object::~Object() {
-    transform.object = nullptr;
-    Parent = nullptr;
-    Components.clear();
-    Components.shrink_to_fit();
-    Children.clear();
-    Children.shrink_to_fit();
 }

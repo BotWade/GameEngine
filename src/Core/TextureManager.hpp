@@ -2,22 +2,15 @@
 #define _TEXTUREMANAGER_
 
 #include "../Graphics/Texture.hpp"
-
 #include <vector>
 
 using namespace std;
 
-enum TextureType {
-    TEXTURE = 0,
-    CUBEMAP = 1,
-};
-
 class TextureManager {
 public:
-    static vector<Texture*> Textures;
+    static vector<Texture*> textures;
 
-    static void Init();
-    static Texture* GetTexture(const char* Location, TextureType type = TEXTURE);
+    static Texture* GetTexture(string FilePath, TextureType type = TEXTURE2D);
     static void Clear();
 };
 

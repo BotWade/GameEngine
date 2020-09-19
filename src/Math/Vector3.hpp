@@ -1,6 +1,9 @@
 #ifndef _VECTOR3_
 #define _VECTOR3_
 
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 #include "Vector2.hpp"
 #include "Math.hpp"
 
@@ -27,6 +30,7 @@ struct Vector3 {
     bool operator!=(const Vector3& other) const;
 
     Vector3 operator+(const Vector3& right) const;
+    Vector3 operator+(const Vector2& right) const;
     Vector3 operator-(const Vector3& right) const;
     Vector3 operator*(const Vector3& right) const;
     Vector3 operator*(const float& right) const;
@@ -34,10 +38,14 @@ struct Vector3 {
     Vector3 operator/(const float& right) const;
 
     Vector3& operator+=(const Vector3& right);
+    Vector3& operator+=(const Vector2& right);
     Vector3& operator-=(const Vector3& right);
 
     float& operator[](int Index);
 
+
+    static vector<VkVertexInputBindingDescription>* GetBindingDescription();
+    static vector<VkVertexInputAttributeDescription>* GetAttributeDescriptions();
 };
 
 

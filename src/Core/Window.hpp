@@ -1,6 +1,7 @@
 #ifndef _WINDOW_
 #define _WINDOW_
 
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include "Debug.hpp"
@@ -10,7 +11,8 @@ class Window {
 public:
     static GLFWwindow* window;
     static Matrix4 OrthoProjection;
-
+    static bool frameBufferResized;
+    
     static void MouseCallback(GLFWwindow* window, double xPos, double yPos);
     static int Setup();
     static Vector2 GetSize();

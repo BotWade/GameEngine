@@ -42,8 +42,6 @@ public:
         
         return nullptr;        
     }
-
-    ~Object();
 };
 
 #endif

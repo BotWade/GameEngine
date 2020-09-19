@@ -1,5 +1,6 @@
 #include "Matrix4.hpp"
 #include "Matrix3.hpp"
+#include "math.h"
 
 Matrix4::Matrix4() {
     
@@ -141,6 +142,29 @@ Matrix4 Matrix4::LookAtLH(Vector3 Eye, Vector3 Center, Vector3 Up)  {
     return Result;
 }
 
+Matrix4 Matrix4::LookAt(Vector3 Eye, Vector3 Center, Vector3 Up)  {
+
+    Vector3 f = Normalize(Center - Eye);
+    Vector3 s = Normalize(Cross(f, Up));
+    Vector3 u = Cross(s, f);
+
+    Matrix4 Result = Matrix4(1);
+    Result.col0.X = s.X;
+    Result.col1.X = s.Y;
+    Result.col2.X = s.Z;
+    Result.col0.Y = u.X;
+    Result.col1.Y = u.Y;
+    Result.col2.Y = u.Z;
+    Result.col0.Z = -f.X;
+    Result.col1.Z = -f.Y;
+    Result.col2.Z = -f.Z;
+    Result.col3.X = -Dot(s, Eye);
+    Result.col3.Y = -Dot(u, Eye);
+    Result.col3.Z = Dot(f, Eye);
+
+    return Result;
+}
+
 Matrix4 Matrix4::PerspectiveFovLH(float Fov, float Width, float Height, float zNear, float zFar) {
 
     if (Width < 0) {
@@ -165,6 +189,24 @@ Matrix4 Matrix4::PerspectiveFovLH(float Fov, float Width, float Height, float zN
     Result.col1.Y = h;
     Result.col2.Z = (zFar + zNear) / (zFar - zNear);
     Result.col2.W = 1.0f;
+    Result.col3.Z = - (2.0f * zFar * zNear) / (zFar - zNear);
+    return Result;
+}
+
+Matrix4 Matrix4::PerspectiveFov(float Fov, float Aspect, float zNear, float zFar) {
+
+    if (abs(Aspect - numeric_limits<float>::epsilon()) < 0.0f) {
+        Debug::Alert("PespectiveFov Faild Because Width Is Negative");
+        return Matrix4(1);
+    }
+
+    float tanHalfFovy = tan(Fov / 2.0f);
+
+    Matrix4 Result(0);
+    Result.col0.X = 1.0f / (Aspect * tanHalfFovy);
+    Result.col1.Y = 1.0f / (tanHalfFovy);
+    Result.col2.Z = - (zFar + zNear) / (zFar - zNear);
+    Result.col2.W = - 1.0f;
     Result.col3.Z = - (2.0f * zFar * zNear) / (zFar - zNear);
     return Result;
 }

@@ -3,11 +3,13 @@
 
 #include "../InterfaceObject.hpp"
 #include "../../Core/TextureManager.hpp"
+
 class Image : public InterfaceObject {
 public:
     
     Texture* texture;
     virtual void Load() override;
+    virtual void Update() override;
     virtual void Render() override;
 };
 

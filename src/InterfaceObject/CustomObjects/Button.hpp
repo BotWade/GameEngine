@@ -10,9 +10,7 @@ using namespace std;
 class Button : public InterfaceObject {
 public:
     string Text;
-    void (*OnClick)();
-
-    virtual void Update() override;
+    
     virtual void Render() override;
 
 };

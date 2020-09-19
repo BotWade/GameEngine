@@ -1,27 +1,27 @@
 #ifndef _SKYBOX_
 #define _SKYBOX_
 
-#define GL_GLEXT_PROTOTYPES
-#include <GLFW/glfw3.h>
-
 #include "Component.hpp"
-#include "../Core/Camera.hpp"
-#include "../Graphics/Shader.hpp"
-#include "../Graphics/Texture.hpp"
 #include "../Mesh/Mesh.hpp"
-#include "../Math/Matrix4.hpp"
-#include "../Math/Matrix3.hpp"
+#include "../Graphics/Vulkan/VulkanPipeLine.hpp"
+#include "../Graphics/Vulkan/Vulkan.hpp"
+#include "../Graphics/Vulkan/VulkanDescriptor.hpp"
 
 class Skybox : public Component {
 public:
-    Texture* texture;
-    Shader* shader;
     Mesh* mesh;
+    Shader* shader;
+    VulkanPipeLine* pipeLine;
+    VulkanCommandBuffer* commandBuffer;
+    VulkanDescriptor uniformData;
+    
+    Matrix4 model;
 
     void LoadSkybox(const char* Skybox, const char* Mesh, const char* Shader);
-
+    void PreRender() override;
     void Update() override;
     void PosRender() override;
+    void Clean() override;
 };
 
 #endif

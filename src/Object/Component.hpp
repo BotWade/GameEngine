@@ -11,10 +11,10 @@ public:
     virtual void Load();
     virtual void Update();
     virtual void OnCollision(RayTestResult result);
+    virtual void PreRender();
     virtual void Render();
     virtual void PosRender();
-
-    ~Component();
+    virtual void Clean();
 };
 
 #endif

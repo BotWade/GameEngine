@@ -37,6 +37,25 @@ bool FileManager::GetFile(const char* FileLocation, ifstream& File) {
     return true;
 }
 
+bool FileManager::GetFileBinary(string& Path, vector<char>& Data) {
+    ifstream file(Path, ios::ate | ios::binary);
+
+    if (!file.is_open())
+        return false;
+
+    size_t fileSize = (size_t) file.tellg();
+    vector<char> buffer(fileSize);
+
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+
+    file.close();
+
+    Data = buffer;
+
+    return true;
+}
+
 bool FileManager::GetFileHex(const char* FileLocation, ifstream& File) {
 
     if (!FileExists(FileLocation))
