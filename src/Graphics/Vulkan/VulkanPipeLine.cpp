@@ -25,9 +25,7 @@ void VulkanPipeLine::PreparePipelineLayout() {
 
     vkPipeLineData.ViewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
     vkPipeLineData.ViewportState.viewportCount = 1;
-    vkPipeLineData.ViewportState.pViewports = &vkPipeLineData.Viewport;
     vkPipeLineData.ViewportState.scissorCount = 1;
-    vkPipeLineData.ViewportState.pScissors = &vkPipeLineData.Scissor;
 
     vkPipeLineData.Rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     vkPipeLineData.Rasterizer.depthClampEnable = VK_FALSE;
@@ -71,6 +69,8 @@ void VulkanPipeLine::PreparePipelineLayout() {
     vkPipeLineData.PipelineLayoutInfo.pushConstantRangeCount = 0;
 
     vkPipeLineData.dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+    vkPipeLineData.dynamicState.dynamicStateCount = static_cast<uint32_t>(vkPipeLineData.dynamicStateEnables.size());
+    vkPipeLineData.dynamicState.pDynamicStates = vkPipeLineData.dynamicStateEnables.data();
     vkPipeLineData.dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     vkPipeLineData.dynamicState.flags = 0;
 }
@@ -86,10 +86,6 @@ void VulkanPipeLine::CreatePipelineLayout(VulkanDescriptor* vulkanDescriptor) {
     
     ///When Resizing The Swapchain we need to recreate the pipeline layout, because only the viewport only the width and height change we seet this values here
     ///We check if width is 0 so that if the dev as set a custom size it dosent override
-    if (vkPipeLineData.Viewport.width == 0) {
-        vkPipeLineData.Viewport.width = (float) Vulkan::swapChainData.Extent.width;
-        vkPipeLineData.Viewport.height = (float) Vulkan::swapChainData.Extent.height;
-    }
 
     if (vkPipeLineData.Scissor.extent.width == 0)
         vkPipeLineData.Scissor.extent = { vkPipeLineData.Viewport.width, vkPipeLineData.Viewport.height};

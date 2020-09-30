@@ -2,10 +2,12 @@
 #include "VulkanDeviceManager.hpp"
 #include "Vulkan.hpp"
 #include "../../Core/Debug.hpp"
+#include "VulkanRenderPass.hpp"
 
 void VulkanFramebuffer::CreateFramebuffers(VulkanRenderPass* renderPass) {
     size_t Size = Vulkan::swapChainData.SwapChainImageViews.size();
     Framebuffers.resize(Size);
+    setRenderPass = renderPass;
 
     for (size_t Index = 0; Index < Size; Index++) {
         vector<VkImageView> attachments = {
@@ -15,7 +17,7 @@ void VulkanFramebuffer::CreateFramebuffers(VulkanRenderPass* renderPass) {
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = renderPass->renderPass;
+        framebufferInfo.renderPass = setRenderPass->renderPass;
         framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
         framebufferInfo.pAttachments = attachments.data();
         framebufferInfo.width = Vulkan::swapChainData.Extent.width;
@@ -44,6 +46,11 @@ void VulkanFramebuffer::CreateFramebuffers(VulkanRenderPass* renderPass, vector<
         if (vkCreateFramebuffer(VulkanDeviceManager::GetSelectedDevice(), &framebufferInfo, nullptr, &Framebuffers[Index]) != VK_SUCCESS)
             Debug::Error("failed to create framebuffer!");
     }  
+}
+
+void VulkanFramebuffer::Recreate() {
+    Clean();
+    CreateFramebuffers(setRenderPass);
 }
 
 void VulkanFramebuffer::Clean() {

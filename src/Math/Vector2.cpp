@@ -1,4 +1,5 @@
 #include "Vector2.hpp"
+#include <math.h>
 
 Vector2::Vector2() {
     
@@ -9,6 +10,13 @@ Vector2::Vector2(float x, float y) {
     
     X = x;
     Y = y;
+}
+
+float Vector2::AngleBetween(Vector2 Right, Vector2 Left) {
+    float s = Right.X * Left.Y - Left.X * Right.Y;
+    float c = Right.X * Left.X + Left.Y * Right.Y;
+
+    return atan2f(s, c) * (180 / M_PI);
 }
 
 bool Vector2::operator==(const Vector2& other) const {

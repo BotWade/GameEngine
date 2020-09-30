@@ -4,6 +4,7 @@
 #include "../Graphics/Renderer.hpp"
 #include "ObjLoader/Loader.hpp"
 #include "../Graphics/Shader.hpp"
+#include <cstring>
 
 Mesh::Mesh() {
     vertexBuffer = nullptr;

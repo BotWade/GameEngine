@@ -1,5 +1,4 @@
 #include "Window.hpp"
-//#include "../Graphics/Renderer.hpp"
 
 GLFWwindow* Window::window;
 Matrix4 Window::OrthoProjection;
@@ -84,7 +83,6 @@ void Window::errorCallback(int error_code, const char* description) {
 }
 
 void Window::framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
     frameBufferResized = true;
     //Renderer::SetScissor(Vector4(0, 0, width, height));
     OrthoProjection = Matrix4::Ortho(0, width, 0, height);

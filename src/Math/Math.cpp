@@ -42,6 +42,20 @@ bool IsPointInsideRect(Vector2 Point, Vector4 Rectangle) {
     return false;
 }
 
+string GenerateRandomString(size_t Length ) {
+    auto randchar = []() -> char {
+        const char charset[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+        const size_t max_index = (sizeof(charset) - 1);
+        return charset[ rand() % max_index ];
+    };
+    string str(Length,0);
+    generate_n( str.begin(), Length, randchar );
+    return str;
+}
+
 Vector3 Cross(const Vector3 Left, const Vector3 Right) {
 
     return Vector3(Left.Y * Right.Z - Right.Y * Left.Z,

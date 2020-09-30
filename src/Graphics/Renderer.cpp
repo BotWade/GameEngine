@@ -12,47 +12,14 @@
 
 using namespace std;
 
-FT_Library Renderer::freeTypeLibrary;
-bool Renderer::faildToLoadFreetype;
-vector<Font*> Renderer::fonts;
 VulkanCommandBuffer* Renderer::ClearCommandBuffer;
 atomic_flag Renderer::QueueInUse;
-
-void Renderer::Init() {
-    faildToLoadFreetype = false;
-
-    if (FT_Init_FreeType(&freeTypeLibrary)) {
-        Debug::Alert("Failed To Initialize FreeType Library");
-        faildToLoadFreetype = true;
-    }
-
-    if (!faildToLoadFreetype) {
-        Font* font = new Font();
-        font->Name = "Arial";
-        font->shader = ShaderManager::GetShader("Data/Shaders/Letter.shader");
-        VulkanPipeLine* pipeLine;
-
-            //font->shader->GetUniform("MVP")->GenerateUniform(sizeof(Matrix4));
-            //font->shader->GenerateDescriptorSetLayout();
-            pipeLine = new VulkanPipeLine();
-            pipeLine->Name = "Font";
-            pipeLine->PreparePipelineLayout();
-            pipeLine->SetVertexInputInfo(Vertex::GetBindingDescription(), Vertex::GetAttributeDescriptions());
-            //pipeLine->CreatePipelineLayout(font->shader);
-            pipeLine->CreatePipeline(font->shader, RenderPassManager::GetRenderPass("Default"));
-            PipelineManager::AddPipeline(pipeLine);
-
-        font->pipeLine = pipeLine;
-        font->LoadFont("Data/Fonts/Arial.ttf");
-        fonts.push_back(font);
-    }
-}
 
 void Renderer::Clear() {
     bool NeedProcessing = (ClearCommandBuffer == nullptr || Vulkan::SwapChainRecreated);
 
     if (ClearCommandBuffer == nullptr)
-        ClearCommandBuffer = CommandBufferManager::AddCommandBuffer("Clear");
+        ClearCommandBuffer = CommandBufferManager::GetOrCreate("Clear");
 
     if (NeedProcessing) {
         Vulkan::commandBuffer = ClearCommandBuffer;
@@ -82,6 +49,14 @@ void Renderer::Clear() {
 
             vkCmdBeginRenderPass(Vulkan::GetCurrentCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
+            Vector2 Size = Window::GetSize();
+
+            VkViewport viewport = { 0.0f, 0.0f, Size.X, Size.Y, 0.0f, 1.0f};
+	        vkCmdSetViewport(Vulkan::GetCurrentCommandBuffer(), 0, 1, &viewport);
+
+	        VkRect2D scissor = { { 0, 0 }, { static_cast<uint32_t>(Size.X), static_cast<uint32_t>(Size.Y) }};
+	        vkCmdSetScissor(Vulkan::GetCurrentCommandBuffer(), 0, 1, &scissor);
+
             vkCmdEndRenderPass(Vulkan::GetCurrentCommandBuffer());
 
             if (vkEndCommandBuffer(Vulkan::GetCurrentCommandBuffer()) != VK_SUCCESS)
@@ -108,6 +83,14 @@ void Renderer::Prepare() {
     renderPassInfo.pClearValues = clearValues.data();
 
     vkCmdBeginRenderPass(Vulkan::GetCurrentCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    Vector2 Size = Window::GetSize();
+
+    VkViewport viewport = { 0.0f, 0.0f, Size.X, Size.Y, 0.0f, 1.0f};
+	vkCmdSetViewport(Vulkan::GetCurrentCommandBuffer(), 0, 1, &viewport);
+
+	VkRect2D scissor = { { 0, 0 }, { static_cast<uint32_t>(Size.X), static_cast<uint32_t>(Size.Y) }};
+	vkCmdSetScissor(Vulkan::GetCurrentCommandBuffer(), 0, 1, &scissor);
 }
 
 SingleTimeCommandData Renderer::BeginSingleTimeCommands() {
@@ -193,40 +176,6 @@ void Renderer::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usageFlags, Vk
         Debug::Error("Failed To Allocate Buffer Memory!");
 
     vkBindBufferMemory(VulkanDeviceManager::GetSelectedDevice(), buffer, bufferMemory, 0);
-}
-
-void Renderer::DrawText(string FontName, string Text, Vector2 Position, float Scale, Vector3 Color) {
-    Font* font = nullptr;
-
-    for (Font* f : fonts) {
-        if (f->Name == FontName) {
-            font = f;
-            break;
-        }
-    }
-
-    if (font == nullptr) {
-        Debug::Alert("Error Drawing Text - " + FontName + " Font Doesn't Exist");
-        return;
-    }
-
-    unsigned int Advance = 0;
-
-    for (char C : Text) {
-        DrawLetter(font, C, Position + Advance, Scale);
-        Advance += font->Characters[C].Advance;
-    }
-}
-
-int Renderer::DrawLetter(Font* font, char Letter, Vector2 Position, float Scale) {
-    font->DrawLetter(Letter);
-    Character c = font->Characters[Letter];
-
-    vector<Vertex> Data = c.quad->Data;
-    for (size_t Index; Index < 4; Index++)
-        Data[Index].Position += Position * Scale;
-
-    c.quad->UpdateData(Data.data(), sizeof(Data[0]) * Data.size());
 }
 
 void Renderer::RendererClear() {

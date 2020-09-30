@@ -3,6 +3,8 @@
 #include "VulkanDeviceManager.hpp"
 #include "../Renderer.hpp"
 #include "../Shader.hpp"
+#include <string.h>
+#include "../Texture.hpp"
 
 UniformData::UniformData(Uniform uniform) {
     type = uniform.type;
@@ -97,6 +99,10 @@ void VulkanDescriptor::Generate(Shader* shader, size_t FrameBufferSize) {
                 case UNIFORM_TEXTURE: {
                     VkDescriptorImageInfo* imageInfo = new VkDescriptorImageInfo();
                     imageInfo->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+                    if (uniformData[SubIndex]->texture == nullptr) {
+                        Debug::Error("Attempted To Genereate Unifrom Buffer Without Setting Texture");
+                    }
 
                     switch (uniformData[SubIndex]->texture->textureType) {
                         case TEXTURE2D:

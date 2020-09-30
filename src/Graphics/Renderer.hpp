@@ -6,7 +6,6 @@
 
 #include <vector>
 
-#include "Font.hpp"
 #include "Shader.hpp"
 #include "../Core/Window.hpp"
 #include "../Math/Ray.hpp"
@@ -28,13 +27,9 @@ struct SingleTimeCommandData {
 
 class Renderer {
 public:
-    static FT_Library freeTypeLibrary;
-    static bool faildToLoadFreetype;
-    static vector<Font*> fonts;
     static VulkanCommandBuffer* ClearCommandBuffer;
     static atomic_flag QueueInUse;
     
-    static void Init();
     static void Clear();
     static void Prepare();
     static void RendererClear();
@@ -43,8 +38,6 @@ public:
     static void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
     static uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
     static void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
-    static void DrawText(string FontName, string Text, Vector2 Position, float Scale, Vector3 Color);
-    static int DrawLetter(Font* font,char Letter, Vector2 Position, float Scale);
     static void SetScissor(Vector4 Region);
     static void SetScissorDefault();
     static void SetDepthMask(bool Active);

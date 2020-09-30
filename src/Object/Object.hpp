@@ -26,10 +26,24 @@ public:
     vector<Component*> Components;
     vector<Object*> Children;
 
+    /**
+    * Add Component To Object
+    * @param component The Component To Add
+    */
     void AddComponent(Component* component);
+    /**
+    * Add Children To Object
+    * @param child The Child You Want To Add
+    */
     void AddChild(Object* child);
+    /**
+    * Execute Code In Components And Children
+    * @param code The Code You Want To Executes 
+    */
     void ExecuteCode(ExecutionCode code);
-
+    /**
+    * @tparam T The Type Of The Component You Want
+    */
     template<class T> T* GetComponent() {
         
         size_t Size = Components.size();

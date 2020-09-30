@@ -199,6 +199,12 @@ void Texture::LoadHDR() {
 
         vkCmdBeginRenderPass(Vulkan::GetCurrentCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
+        VkViewport viewport = { 0.0f, 0.0f, Width, Height, 0.0f, 1.0f};
+	    vkCmdSetViewport(Vulkan::GetCurrentCommandBuffer(), 0, 1, &viewport);
+
+	    VkRect2D scissor = { { 0, 0 }, { static_cast<uint32_t>(Width), static_cast<uint32_t>(Height) }};
+	    vkCmdSetScissor(Vulkan::GetCurrentCommandBuffer(), 0, 1, &scissor);
+
         vkCmdBindPipeline(Vulkan::GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeLine->graphicsPipeline);
 
         cube->Bind();

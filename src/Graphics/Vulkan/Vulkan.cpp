@@ -176,12 +176,13 @@ void Vulkan::CreateImageViews() {
 }
 
 void Vulkan::PrepareFrame() {
-    SwapChainRecreated = false;
+
     vkWaitForFences(VulkanDeviceManager::GetSelectedDevice(), 1, &VulkanSemaphore::inFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
 
     VkResult Result = vkAcquireNextImageKHR(VulkanDeviceManager::GetSelectedDevice(), swapChainData.SwapChain, UINT64_MAX, VulkanSemaphore::imageAvailableSemaphores[CurrentFrame], VK_NULL_HANDLE, &imageIndex);
-
+    
     if (Result == VK_ERROR_OUT_OF_DATE_KHR)  {
+        Window::frameBufferResized = false;
         RecreateSwapChain();
         return;
     }
@@ -190,6 +191,11 @@ void Vulkan::PrepareFrame() {
 }
 
 void Vulkan::DrawFrame() {
+
+    if (SwapChainRecreated) {
+        SwapChainRecreated = false;
+        return;
+    }
 
     if (VulkanSemaphore::imagesInFlight[imageIndex] != VK_NULL_HANDLE)
         vkWaitForFences(VulkanDeviceManager::GetSelectedDevice(), 1, &VulkanSemaphore::imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
@@ -238,13 +244,13 @@ void Vulkan::DrawFrame() {
     }
     else if (Result != VK_SUCCESS)
         Debug::Error("Failed To Present Swap Chain Image!");
-
+    
     CurrentFrame = (CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void Vulkan::RecreateSwapChain() {
     Vector2 Size = Window::GetSize();
-
+    SwapChainRecreated = true;
     while (Size.X == 0 || Size.Y == 0) {
         Size = Window::GetSize();
         glfwWaitEvents();
@@ -252,22 +258,23 @@ void Vulkan::RecreateSwapChain() {
 
     vkDeviceWaitIdle(VulkanDeviceManager::GetSelectedDevice());
 
-    CleanSwapChain();
+    for (auto imageView : swapChainData.SwapChainImageViews)
+        vkDestroyImageView(VulkanDeviceManager::GetSelectedDevice(), imageView, nullptr);
+
+    vkDestroySwapchainKHR(VulkanDeviceManager::GetSelectedDevice(), swapChainData.SwapChain, nullptr);
+
+    vkDestroyImageView(VulkanDeviceManager::GetSelectedDevice(), depthImageView, nullptr);
+    vkDestroyImage(VulkanDeviceManager::GetSelectedDevice(), depthImage, nullptr);
+    vkFreeMemory(VulkanDeviceManager::GetSelectedDevice(), depthImageMemory, nullptr);
 
     CreateSwapChain();
     CreateImageViews();
-
-    RenderPassManager::RecreateRenderPass();
-    PipelineManager::RecreatePipeline();
-    CommandBufferManager::Clear();
-    
-    //frameBuffer->CreateFramebuffers(RenderPassManager::GetRenderPass("Default")->renderPass);
-    CommandBufferManager::RecreateCommandBuffers();
+    CreateDepthResources();
+    frameBuffer->Recreate();
 }
 
 void Vulkan::CleanSwapChain() {
-    for (VkFramebuffer framebuffer : frameBuffer->Framebuffers)
-        vkDestroyFramebuffer(VulkanDeviceManager::GetSelectedDevice(), framebuffer, nullptr);
+    frameBuffer->Clean();
     
     PipelineManager::CleanPipelines();
     RenderPassManager::ClearRenderPass();
