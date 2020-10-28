@@ -4,9 +4,14 @@
 #include "Object.hpp"
 #include "../Collisions/CollisionManager.hpp"
 
+class Transform;
+
 class Component {
 public:
     Object* object;
+    Transform* transform;
+
+    void SetObject(Object* newObject);
 
     virtual void Load();
     virtual void Update();

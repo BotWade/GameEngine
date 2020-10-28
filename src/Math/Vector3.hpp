@@ -17,7 +17,8 @@ struct Vector3 {
     Vector3(float x, float y, float z);
 
     static Vector3 Zero();
-
+    static Vector3 Up();
+    
     Vector2 Xy();
     Vector3 GetSafeNormal(float Tolerance = SMALL_NUMBER);
     float Length();

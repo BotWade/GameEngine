@@ -7,7 +7,7 @@ Object::Object() {
 }
 
 void Object::AddComponent(Component* component) {
-    component->object = this;
+    component->SetObject(this);
     Components.push_back(component);
 }
 

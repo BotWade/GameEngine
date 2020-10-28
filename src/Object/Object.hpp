@@ -43,6 +43,7 @@ public:
     void ExecuteCode(ExecutionCode code);
     /**
     * @tparam T The Type Of The Component You Want
+    * @return Returns A Pointer Of The Type T If It Doesnt Exist It Returns nullptr;
     */
     template<class T> T* GetComponent() {
         

@@ -16,7 +16,11 @@ Vector3::Vector3(float x, float y, float z) {
 }
 
 Vector3 Vector3::Zero() {
-    return Vector3(0, 0, 0);
+    return Vector3(0.0f, 0.0f, 0.0f);
+}
+
+Vector3 Vector3::Up() {
+    return Vector3(0.0f, 1.0f, 0.0f);
 }
 
 Vector2 Vector3::Xy() {

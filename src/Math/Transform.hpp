@@ -14,6 +14,7 @@ public:
 
     Transform();
 
+    Vector3 Up();
     Quaternion Rotation();
     Vector3 Scale();
     Vector3 Position();

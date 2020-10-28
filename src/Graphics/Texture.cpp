@@ -93,8 +93,6 @@ struct HDRProjectionData {
     Matrix4 View;
 };
 
-///TODO: Right Now The HDR Size Is The Same For ANY HDR Image
-///
 void Texture::LoadHDRLoaders(Vector2 Size) {
     HDRLoaderLoading = true;
 

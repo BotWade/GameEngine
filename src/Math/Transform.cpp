@@ -7,6 +7,10 @@ Transform::Transform() {
     localPosition = Vector3(0, 0, 0);
 }
 
+Vector3 Transform::Up() {
+    return Rotation() * Vector3::Up();
+}
+
 Quaternion Transform::Rotation() {
     return (object->Parent == nullptr ? localRotation : localRotation * object->Parent->transform.Rotation()); 
 }
