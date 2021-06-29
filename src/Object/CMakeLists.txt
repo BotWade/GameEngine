@@ -1,5 +1,6 @@
 target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Object.cpp)
 target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Component.cpp)
 target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Skybox.cpp)
+target_sources(GameEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Scene.cpp)
 add_subdirectory(Debug/)
 add_subdirectory(Render/)

@@ -32,7 +32,7 @@ void VulkanPipeLine::PreparePipelineLayout() {
     vkPipeLineData.Rasterizer.rasterizerDiscardEnable = VK_FALSE;
     vkPipeLineData.Rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     vkPipeLineData.Rasterizer.lineWidth = 1.0f;
-    vkPipeLineData.Rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+    vkPipeLineData.Rasterizer.cullMode = VK_CULL_MODE_NONE;
     vkPipeLineData.Rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
     vkPipeLineData.Rasterizer.depthBiasEnable = VK_FALSE;
 

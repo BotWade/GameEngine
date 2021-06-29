@@ -3,7 +3,9 @@
 
 Object::Object() {
     transform.object = this;
+    Persistant = true;
     Parent = nullptr;
+    Components = { };
 }
 
 void Object::AddComponent(Component* component) {

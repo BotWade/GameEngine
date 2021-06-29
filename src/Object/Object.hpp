@@ -20,7 +20,12 @@ public:
     string Tag;
     Transform transform;
     Object* Parent;
-
+    
+    /**
+    * If persistant Scene::Load won't delete
+    */
+    bool Persistant;
+    
     Object();
 
     vector<Component*> Components;

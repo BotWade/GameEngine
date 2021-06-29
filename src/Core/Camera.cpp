@@ -54,7 +54,7 @@ void Camera::Update() {
     View = Matrix4::LookAtLH(Position, FirstPersonMode ? Position + Vector3(0, 0, 1) : Center, Vector3(0, 1, 0));
     
     Vector2 WindowSize = Window::GetSize();
-    Projection = Matrix4::PerspectiveFovLH(Radians(45.0f), WindowSize.X, WindowSize.Y, 0.1f, 1000.0f);
+    Projection = Matrix4::PerspectiveFovLH(Radians(90.0f), WindowSize.X, WindowSize.Y, 0.1f, 1000.0f);
     Projection.col1.Y *= -1;
     ProjectionView = Projection * View;
 }
